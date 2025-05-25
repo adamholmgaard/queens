@@ -1,5 +1,9 @@
 use std::collections::HashMap;
+use std::ffi::c_ushort;
 use std::ops::{Range, RangeInclusive};
+use log::debug;
+use rand::prelude::SliceRandom;
+use rand::Rng;
 use crate::state::coordinate::Coordinate;
 
 // A set of contiguous indices on the grid
@@ -57,7 +61,7 @@ impl Area {
     pub fn get_sections(&self) -> &Vec<usize> {
         &self.sections
     }
-    
+
     pub fn get_color(&self) -> u8 {
         self.color
     }
@@ -73,7 +77,7 @@ impl Layout {
     fn new(areas: Vec<Area>) -> Layout {
         Self { areas }
     }
-    
+
     pub fn get_areas(&self) -> &Vec<Area> {
         &self.areas
     }
@@ -87,7 +91,7 @@ impl Layout {
             .iter().enumerate()
             .map(|(i, secs)| Area::from_sections(secs.clone(), i as u8))
             .collect::<Vec<Area>>();
-        
+
         // todo we do not check for overlap right now
 
         Self { areas }
@@ -106,7 +110,7 @@ impl Layout {
 
 impl Default for Layout {
     fn default() -> Self {
-        easy_layout()
+        generate_layout()
     }
 }
 
@@ -197,4 +201,59 @@ pub fn complex_layout() -> Layout {
     let r10 = vec![section(n * n - 2)];
 
     Layout::from_sections(vec![r1, r2, r3, r4, r5, r6, r7, r8, r9, r10], n)
+}
+
+pub fn generate_layout() -> Layout {
+    let n: usize = 10;
+    let size: usize = n.pow(2);
+    let mut areas: Vec<Vec<Section>> = Vec::new();
+    let mut numbers: Vec<usize> = (0..size).collect();
+    let mut rng = rand::rng();
+    numbers.shuffle(&mut rng);
+    let mut taken = [false; 100];
+
+    for _ in 0..n {
+        let mut vec: Vec<Section> = Vec::new();
+        let mut r = numbers.pop().unwrap();
+
+        while taken[r] {
+            match numbers.pop() {
+                None => {
+                    // try again
+                    return generate_layout()
+                }
+                Some(num) => {
+                    r = num;
+                }
+            }
+        }
+        
+        for i in 0..n {
+            taken[i*n+ (r % n)] = true;
+            taken[r - (r%n) + i] = true;
+        }
+        
+        let bottom_row = r < n;
+        let top_row = r >= size - n;
+        let left_col = r % n == 0;
+        let right_col = r % n == n - 1;
+        
+        if !bottom_row && !left_col {
+            taken[r - n - 1] = true;
+        }
+        if !bottom_row && !right_col {
+            taken[r - n + 1] = true;
+        }
+        if !top_row && !left_col {
+            taken[r + n - 1] = true;
+        }
+        if !top_row && !right_col {
+            taken[r + n + 1] = true;
+        }
+        
+        vec.push(section(r));
+        areas.push(vec);
+    }
+
+    Layout::from_sections(areas, n as usize)
 }
