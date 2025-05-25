@@ -1,10 +1,10 @@
 use crate::state::state::State;
 use crate::state::tile::Tile;
 pub(crate) use crate::view::grid_ui::GridUi;
+use crate::view::highlight_ui::HighlightUI;
 use crate::view::underlay_ui::UnderlayUi;
 use eframe::egui::{vec2, Align2, Area, Button, CentralPanel, Context, Id, Ui, Vec2, Window};
 use log::debug;
-use crate::view::highlight_ui::HighlightUI;
 
 // Ingame ui
 #[derive(Default)]

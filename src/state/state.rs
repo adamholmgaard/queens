@@ -22,11 +22,11 @@ impl State {
     pub fn get_grid(&self) -> Grid {
         self.grid.clone()
     }
-    
+
     pub fn get_layout(&self) -> Layout {
         self.layout.clone()
     }
-    
+
     pub fn get_tile(&self, x: Coordinate) -> Tile {
         self.grid.get_tile(x).expect("no tile found")
     }
@@ -69,7 +69,7 @@ impl State {
                                 self.grid
                                     .clone()
                                     .coord_from_indices(row, col)
-                                    .expect("Index out of bounds")
+                                    .expect("Index out of bounds"),
                             )
                             .expect("Index out of bounds"),
                     })

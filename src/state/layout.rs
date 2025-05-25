@@ -1,10 +1,8 @@
-use std::collections::HashMap;
-use std::ffi::c_ushort;
-use std::ops::{Range, RangeInclusive};
+use crate::state::coordinate::Coordinate;
 use log::debug;
 use rand::prelude::SliceRandom;
 use rand::Rng;
-use crate::state::coordinate::Coordinate;
+use std::ops::{Range, RangeInclusive};
 
 // A set of contiguous indices on the grid
 #[derive(Clone, Debug)]
@@ -55,7 +53,10 @@ impl Area {
             }
         }
 
-        Self { sections: res, color: col }
+        Self {
+            sections: res,
+            color: col,
+        }
     }
 
     pub fn get_sections(&self) -> &Vec<usize> {
@@ -88,7 +89,8 @@ impl Layout {
         }
 
         let areas = sections
-            .iter().enumerate()
+            .iter()
+            .enumerate()
             .map(|(i, secs)| Area::from_sections(secs.clone(), i as u8))
             .collect::<Vec<Area>>();
 
@@ -210,50 +212,93 @@ pub fn generate_layout() -> Layout {
     let mut numbers: Vec<usize> = (0..size).collect();
     let mut rng = rand::rng();
     numbers.shuffle(&mut rng);
-    let mut taken = [false; 100];
+    let mut unavailable = [false; 100];
+    let mut placed = [false; 100];
 
     for _ in 0..n {
         let mut vec: Vec<Section> = Vec::new();
         let mut r = numbers.pop().unwrap();
 
-        while taken[r] {
+        while unavailable[r] {
             match numbers.pop() {
                 None => {
                     // try again
-                    return generate_layout()
+                    return generate_layout();
                 }
                 Some(num) => {
                     r = num;
                 }
             }
         }
-        
+
         for i in 0..n {
-            taken[i*n+ (r % n)] = true;
-            taken[r - (r%n) + i] = true;
+            unavailable[i * n + (r % n)] = true;
+            unavailable[r - (r % n) + i] = true;
         }
-        
+
         let bottom_row = r < n;
         let top_row = r >= size - n;
         let left_col = r % n == 0;
         let right_col = r % n == n - 1;
-        
+
         if !bottom_row && !left_col {
-            taken[r - n - 1] = true;
+            unavailable[r - n - 1] = true;
         }
         if !bottom_row && !right_col {
-            taken[r - n + 1] = true;
+            unavailable[r - n + 1] = true;
         }
         if !top_row && !left_col {
-            taken[r + n - 1] = true;
+            unavailable[r + n - 1] = true;
         }
         if !top_row && !right_col {
-            taken[r + n + 1] = true;
+            unavailable[r + n + 1] = true;
         }
-        
+
+        placed[r] = true;
+
         vec.push(section(r));
         areas.push(vec);
     }
 
-    Layout::from_sections(areas, n as usize)
+    let mut number_placed = n;
+
+    while number_placed < size {
+        let area_chosen_index = rng.random_range(0..n-1);
+        let area_chosen = areas.get(area_chosen_index).unwrap().clone();
+        
+        let y = rng.random_range(0..area_chosen.len());
+        let area = area_chosen.get(y).unwrap().inner.start;
+
+        let bottom_row = area < n;
+        let top_row = area >= size - n;
+        let left_col = area % n == 0;
+        let right_col = area % n == n - 1;
+
+        let x = rng.random_range(0..4);
+
+        if x == 0 && !left_col && !placed[area - 1] {
+            areas[area_chosen_index].push(section(area - 1));
+            placed[area - 1] = true;
+            number_placed += 1;
+        }
+        if x == 1 && !right_col && !placed[area + 1] {
+            areas[area_chosen_index].push(section(area + 1));
+            placed[area + 1] = true;
+            number_placed += 1;
+        }
+        if x== 2 && !bottom_row && !placed[area - n] {
+            areas[area_chosen_index].push(section(area - n));
+            placed[area - n] = true;
+            number_placed += 1;
+        }
+        if x== 3 && !top_row && !placed[area + n] {
+            areas[area_chosen_index].push(section(area + n));
+            placed[area + n] = true;
+            number_placed += 1;
+        }
+
+        debug!("{}", number_placed);
+    }
+
+    Layout::from_sections(areas, n)
 }
