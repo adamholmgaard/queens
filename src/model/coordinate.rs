@@ -15,6 +15,31 @@ impl Display for CoordinateError {
 }
 
 #[derive(Debug, Clone, Copy)]
+pub struct ContextCoordinate {
+    row: usize,
+    col: usize,
+    n: usize,
+}
+
+impl ContextCoordinate {
+    pub fn new(row: usize, col: usize, n: usize) -> Self {
+        Self { row, col, n }
+    }
+
+    pub fn get_row(&self) -> usize {
+        self.row
+    }
+
+    pub fn get_col(&self) -> usize {
+        self.col
+    }
+
+    pub fn get_n(&self) -> usize {
+        self.n
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
 pub struct Coordinate {
     raw: usize,
 }
@@ -60,10 +85,11 @@ impl From<usize> for Coordinate {
     }
 }
 
-impl From<Coordinate> for usize {
-    // maybe not? since we have get()
-    fn from(coord: Coordinate) -> Self {
-        coord.raw
+impl From<ContextCoordinate> for Coordinate {
+    fn from(value: ContextCoordinate) -> Self {
+        Self {
+            raw: value.row * value.n + value.col,
+        }
     }
 }
 

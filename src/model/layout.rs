@@ -1,4 +1,4 @@
-use crate::state::coordinate::Coordinate;
+use crate::model::coordinate::Coordinate;
 use log::debug;
 use rand::prelude::SliceRandom;
 use rand::Rng;
@@ -10,24 +10,24 @@ pub struct Section {
     inner: Range<usize>,
 }
 
-impl Into<Section> for usize {
-    fn into(self) -> Section {
+impl From<usize> for Section {
+    fn from(value: usize) -> Self {
         Section {
-            inner: self..self + 1,
+            inner: value..value + 1,
         }
     }
 }
 
-impl Into<Section> for Range<usize> {
-    fn into(self) -> Section {
-        Section { inner: self }
+impl From<Range<usize>> for Section {
+    fn from(value: Range<usize>) -> Self {
+        Section { inner: value }
     }
 }
 
-impl Into<Section> for RangeInclusive<usize> {
-    fn into(self) -> Section {
+impl From<RangeInclusive<usize>> for Section {
+    fn from(value: RangeInclusive<usize>) -> Self {
         Section {
-            inner: self.clone().into_inner().0..self.into_inner().1 + 1,
+            inner: value.clone().into_inner().0..value.into_inner().1 + 1,
         }
     }
 }
@@ -205,6 +205,7 @@ pub fn complex_layout() -> Layout {
     Layout::from_sections(vec![r1, r2, r3, r4, r5, r6, r7, r8, r9, r10], n)
 }
 
+// Generate a solvable layout with n=10
 pub fn generate_layout() -> Layout {
     let n: usize = 10;
     let size: usize = n.pow(2);
@@ -263,9 +264,11 @@ pub fn generate_layout() -> Layout {
     let mut number_placed = n;
 
     while number_placed < size {
-        let area_chosen_index = rng.random_range(0..n-1);
+        // we do n - 1 to guarantee an area of one tile.
+        // consider doing a skewed distribution instead like Poisson.
+        let area_chosen_index = rng.random_range(0..n - 1);  
         let area_chosen = areas.get(area_chosen_index).unwrap().clone();
-        
+
         let y = rng.random_range(0..area_chosen.len());
         let area = area_chosen.get(y).unwrap().inner.start;
 
@@ -286,18 +289,16 @@ pub fn generate_layout() -> Layout {
             placed[area + 1] = true;
             number_placed += 1;
         }
-        if x== 2 && !bottom_row && !placed[area - n] {
+        if x == 2 && !bottom_row && !placed[area - n] {
             areas[area_chosen_index].push(section(area - n));
             placed[area - n] = true;
             number_placed += 1;
         }
-        if x== 3 && !top_row && !placed[area + n] {
+        if x == 3 && !top_row && !placed[area + n] {
             areas[area_chosen_index].push(section(area + n));
             placed[area + n] = true;
             number_placed += 1;
         }
-
-        debug!("{}", number_placed);
     }
 
     Layout::from_sections(areas, n)

@@ -1,6 +1,5 @@
-use crate::state::state::State;
-use eframe::egui::{Button, Color32, CornerRadius, Pos2, Rect, Stroke, StrokeKind, Ui, Vec2};
-use log::debug;
+use crate::model::state::State;
+use eframe::egui::{Color32, CornerRadius, Pos2, Rect, Stroke, StrokeKind, Ui, Vec2};
 
 pub struct UnderlayUi {}
 

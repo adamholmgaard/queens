@@ -1,4 +1,4 @@
-use crate::state::distinct_colors::{get_distinct_checked_color, get_distinct_color};
+use crate::model::distinct_colors::{get_distinct_checked_color, get_distinct_color};
 use eframe::egui::{vec2, Button, Color32, Response, RichText, Ui, Vec2, Widget};
 
 static TILE_SIZE: Vec2 = vec2(32.0, 32.0);
@@ -31,10 +31,6 @@ impl Tile {
         } else {
             get_distinct_color(self.color)
         }
-    }
-
-    pub fn set_color(&mut self, color: u8) {
-        self.color = color;
     }
 
     pub fn is_set(&self) -> bool {

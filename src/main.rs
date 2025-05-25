@@ -1,7 +1,7 @@
-mod state;
+mod model;
 mod view;
 
-use crate::state::state::State;
+use crate::model::state::State;
 use eframe::egui::Context;
 use eframe::{egui, Frame};
 use view::queens_ui::QueensUi;

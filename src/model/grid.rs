@@ -1,5 +1,5 @@
-use crate::state::coordinate::{Coordinate, CoordinateError};
-use crate::state::tile::Tile;
+use crate::model::coordinate::{Coordinate, CoordinateError};
+use crate::model::tile::Tile;
 
 // 0-indexed square matrix of tiles.
 #[derive(Clone, Debug)]
@@ -17,7 +17,7 @@ impl Grid {
     }
     pub fn get_tile(&self, index: Coordinate) -> Result<Tile, CoordinateError> {
         match self.data.get(index.get()) {
-            Some(tile) => Ok(tile.clone()),
+            Some(tile) => Ok(*tile),
             None => Err(CoordinateError::default()),
         }
     }
@@ -34,7 +34,7 @@ impl Grid {
         let index = self
             .clone()
             .coord_from_indices(row as usize, col as usize)?;
-        self.get_tile(Coordinate::from(index))
+        self.get_tile(index)
     }
 
     pub fn set_tile(&mut self, index: Coordinate, tile: Tile) {

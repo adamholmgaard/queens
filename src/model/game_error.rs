@@ -1,5 +1,5 @@
-use crate::state::coordinate::Coordinate;
-use crate::state::layout::Area;
+use crate::model::coordinate::Coordinate;
+use crate::model::layout::Area;
 use std::fmt::{Display, Formatter};
 
 #[derive(Clone, Debug)]

@@ -1,15 +1,13 @@
-use crate::state::coordinate::{Coordinate, CoordinateError};
-use crate::state::game_error::GameError;
-use crate::state::grid::Grid;
-use crate::state::layout::{complex_layout, Layout};
-use crate::state::tile::Tile;
+use crate::model::coordinate::{Coordinate, CoordinateError};
+use crate::model::game_error::GameError;
+use crate::model::grid::Grid;
+use crate::model::layout::{complex_layout, Layout};
+use crate::model::tile::Tile;
 use log::warn;
 
 #[derive(Clone)]
 pub struct State {
     //  gamestate : enum{ingame, won, lost, pregame...}
-    debug: bool,
-    // errors: list errors
     grid: Grid,
     layout: Layout,
 }
@@ -130,10 +128,6 @@ impl Default for State {
             }
         }
 
-        Self {
-            debug: true,
-            grid,
-            layout,
-        }
+        Self { grid, layout }
     }
 }

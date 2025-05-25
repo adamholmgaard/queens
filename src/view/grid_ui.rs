@@ -1,6 +1,6 @@
-use crate::state::coordinate::Coordinate;
-use crate::state::state::State;
-use crate::state::tile::Tile;
+use crate::model::coordinate::Coordinate;
+use crate::model::state::State;
+use crate::model::tile::Tile;
 use eframe::egui::{Ui, Vec2};
 use log::debug;
 

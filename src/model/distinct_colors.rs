@@ -1,6 +1,8 @@
 use eframe::egui::Color32;
 
-// todo make this return (one of) n colors
+// todo generalise
+// maybe try https://colorbrewer2.org/#type=qualitative&scheme=Paired&n=12
+// and if that, also just upper bound by 12 (seems reasonable)
 pub fn get_distinct_color(c: u8) -> Color32 {
     let res = match c {
         0 => Color32::from_hex("#00008b"),

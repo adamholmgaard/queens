@@ -1,5 +1,5 @@
-use crate::state::state::State;
-use crate::state::tile::Tile;
+use crate::model::state::State;
+use crate::model::tile::Tile;
 pub(crate) use crate::view::grid_ui::GridUi;
 use crate::view::highlight_ui::HighlightUI;
 use crate::view::underlay_ui::UnderlayUi;
@@ -22,6 +22,7 @@ impl QueensUi {
 
         let (errors, game_won) = state.get_game_status();
 
+        // TODO only show these windows if debug
         if !errors.is_empty() {
             Window::new("Error list")
                 .anchor(Align2::RIGHT_TOP, Vec2::new(0.0, 15.0))

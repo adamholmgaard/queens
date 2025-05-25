@@ -1,7 +1,7 @@
-use crate::state::coordinate::Coordinate;
-use crate::state::layout::Area;
-use crate::state::state::State;
-use eframe::egui::{vec2, Button, Color32, Context, Ui, Vec2};
+use crate::model::coordinate::Coordinate;
+use crate::model::layout::Area;
+use crate::model::state::State;
+use eframe::egui::{vec2, Color32, Ui, Vec2};
 
 #[derive(Default)]
 pub struct HighlightUI {}
