@@ -16,7 +16,7 @@ fn main() -> eframe::Result {
     };
 
     eframe::run_native(
-        "Custom Keypad App",
+        "Queens",
         options,
         Box::new(|cc| {
             // Use the dark theme
