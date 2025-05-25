@@ -70,7 +70,6 @@ impl State {
                                     .clone()
                                     .coord_from_indices(row, col)
                                     .expect("Index out of bounds")
-                                    .get(),
                             )
                             .expect("Index out of bounds"),
                     })
@@ -125,9 +124,9 @@ impl Default for State {
         let mut grid = Grid::default();
         let layout = Layout::default();
 
-        for (area, color) in layout.get_colors() {
+        for area in layout.get_areas() {
             for index in area.get_sections().clone() {
-                grid.set_tile(Coordinate::from(index), Tile::new(false, color));
+                grid.set_tile(Coordinate::from(index), Tile::new(false, area.get_color()));
             }
         }
 

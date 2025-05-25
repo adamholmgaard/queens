@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::ops::{Range, RangeInclusive};
+use crate::state::coordinate::Coordinate;
 
 // A set of contiguous indices on the grid
 #[derive(Clone, Debug)]
@@ -37,10 +38,11 @@ fn section<R: Into<Section>>(c: R) -> Section {
 #[derive(Eq, Hash, PartialEq, Clone, Debug, Default)]
 pub struct Area {
     sections: Vec<usize>,
+    color: u8,
 }
 
 impl Area {
-    fn from_sections(sections: Vec<Section>) -> Area {
+    fn from_sections(sections: Vec<Section>, col: u8) -> Area {
         let mut res = Vec::new();
 
         for section in sections {
@@ -49,33 +51,31 @@ impl Area {
             }
         }
 
-        Self { sections: res }
+        Self { sections: res, color: col }
     }
 
     pub fn get_sections(&self) -> &Vec<usize> {
         &self.sections
+    }
+    
+    pub fn get_color(&self) -> u8 {
+        self.color
     }
 }
 
 // Layout of multiple areas
 #[derive(Clone, Debug)]
 pub struct Layout {
-    colors: HashMap<Area, u8>,
+    areas: Vec<Area>,
 }
 
 impl Layout {
-    fn from_areas(areas: Vec<Area>) -> Layout {
-        let mut colors: HashMap<Area, u8> = HashMap::new();
-
-        for (index, area) in areas.iter().enumerate() {
-            colors.insert(area.clone(), index as u8);
-        }
-
-        Self { colors }
+    fn new(areas: Vec<Area>) -> Layout {
+        Self { areas }
     }
     
-    pub fn get_areas(&self) -> Vec<&Area> {
-        self.colors.keys().collect::<Vec<&Area>>()
+    pub fn get_areas(&self) -> &Vec<Area> {
+        &self.areas
     }
 
     fn from_sections(sections: Vec<Vec<Section>>, n: usize) -> Layout {
@@ -84,36 +84,23 @@ impl Layout {
         }
 
         let areas = sections
-            .iter()
-            .map(|secs| Area::from_sections(secs.clone()))
+            .iter().enumerate()
+            .map(|(i, secs)| Area::from_sections(secs.clone(), i as u8))
             .collect::<Vec<Area>>();
-        // to do we do not check for overlap right now
+        
+        // todo we do not check for overlap right now
 
-        let mut colors = HashMap::new();
-
-        for (index, a) in areas.iter().enumerate() {
-            colors.insert(a.clone(), index as u8);
-        }
-
-        Self { colors }
+        Self { areas }
     }
 
-    fn get_color(&self, coord: Area) -> u8 {
-        self.colors[&coord]
-    }
-
-    pub fn get_area(&self, index: usize) -> Result<Area, &str> {
-        for (a, _) in self.colors.iter() {
-            if a.sections.contains(&index) {
+    pub fn get_area(&self, index: Coordinate) -> Result<Area, &str> {
+        for a in self.areas.iter() {
+            if a.sections.contains(&index.get()) {
                 return Ok(a.clone());
             }
         }
 
         Err("No colored area found for index")
-    }
-
-    pub fn get_colors(&self) -> HashMap<Area, u8> {
-        self.colors.clone()
     }
 }
 
