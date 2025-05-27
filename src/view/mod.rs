@@ -1,4 +1,2 @@
-mod grid_ui;
-mod highlight_ui;
-pub mod queens_ui;
-mod underlay_ui;
+pub mod in_game;
+pub mod main_menu;

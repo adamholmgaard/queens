@@ -1,4 +1,4 @@
-use crate::model::errors::QueensResult;
+use crate::errors::QueensResult;
 use crate::model::state::State;
 use crate::model::tile::Tile;
 use eframe::egui::{Ui, Vec2};

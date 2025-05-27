@@ -1,4 +1,4 @@
-use crate::model::errors::QueensResult;
+use crate::errors::QueensResult;
 use crate::model::layout::{section, Area, Layout};
 use crate::model::state::State;
 use crate::model::tile::{Tile, TILE_SIZE};
@@ -10,7 +10,7 @@ pub struct HighlightUI {}
 
 impl HighlightUI {
     pub fn render(ui: &mut Ui, state: &State) -> QueensResult<()> {
-        Self::render_areas(ui, state.clone());
+        Self::render_areas(ui, state.clone())?;
         Self::render_keyboard_mark(ui, state.clone())?;
         Ok(())
     }

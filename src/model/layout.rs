@@ -1,4 +1,4 @@
-use crate::model::errors::{QueensError, QueensResult};
+use crate::errors::{QueensError, QueensResult};
 use rand::prelude::SliceRandom;
 use rand::Rng;
 use std::ops::{Range, RangeInclusive};

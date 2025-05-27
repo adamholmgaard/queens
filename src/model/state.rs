@@ -1,15 +1,22 @@
-use crate::model::errors::{QueensError, QueensResult};
+use crate::errors::{QueensError, QueensResult};
 use crate::model::game_rule_broken::GameRuleBroken;
 use crate::model::grid::Grid;
 use crate::model::layout::{complex_layout, Layout};
 use crate::model::tile::Tile;
-use log::{debug, warn};
+
+#[derive(Default, Clone)]
+pub enum GameState {
+    MainMenu,
+    #[default] // default is ingame until main menu is fully functional
+    InGame,
+    Won,
+}
 
 #[derive(Clone)]
 pub struct State {
-    //  gamestate : enum{ingame, won, lost, pregame...}
     grid: Grid,
     layout: Layout,
+    game_state: GameState,
     marked: Option<usize>,
 }
 
@@ -24,6 +31,10 @@ impl State {
 
     pub fn get_marked(&self) -> Option<usize> {
         self.marked
+    }
+
+    pub fn get_game_state(&self) -> &GameState {
+        &self.game_state
     }
 
     pub fn set_marked(&mut self, marked: Option<usize>) {
@@ -49,7 +60,12 @@ impl State {
         })
     }
 
-    pub fn get_game_status(&self) -> QueensResult<(Vec<GameRuleBroken>, bool)> {
+    pub fn set_game_state(&mut self, game_state: GameState) {
+        self.game_state = game_state;
+    }
+
+    // Get the list of game errors and whether the game has been won.
+    pub fn get_win_status(&self) -> QueensResult<(Vec<GameRuleBroken>, bool)> {
         let n = self.get_n();
         let mut errors = Vec::new();
         let mut rows = Vec::new();
@@ -132,6 +148,7 @@ impl Default for State {
             grid,
             layout,
             marked: None,
+            game_state: GameState::default(),
         }
     }
 }

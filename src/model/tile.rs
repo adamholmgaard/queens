@@ -1,4 +1,4 @@
-use crate::model::distinct_colors::{get_distinct_checked_color, get_distinct_color};
+use crate::distinct_colors::{get_distinct_checked_color, get_distinct_color};
 use eframe::egui::{vec2, Button, Color32, Response, RichText, Ui, Vec2, Widget};
 
 pub static TILE_SIZE: Vec2 = vec2(32.0, 32.0);

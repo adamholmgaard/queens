@@ -1,4 +1,4 @@
-use crate::model::errors::{QueensError, QueensResult};
+use crate::errors::{QueensError, QueensResult};
 use crate::model::tile::Tile;
 use std::fmt;
 use std::fmt::{Display, Formatter};

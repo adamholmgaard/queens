@@ -1,11 +1,9 @@
-use crate::model::errors::QueensResult;
+use crate::errors::QueensResult;
 use crate::model::state::State;
-use crate::model::tile::Tile;
-pub(crate) use crate::view::grid_ui::GridUi;
-use crate::view::highlight_ui::HighlightUI;
-use crate::view::underlay_ui::UnderlayUi;
 use eframe::egui::{vec2, Align2, Area, Button, CentralPanel, Context, Id, Key, Ui, Vec2, Window};
-use log::debug;
+use crate::view::in_game::grid_ui::GridUi;
+use crate::view::in_game::highlight_ui::HighlightUI;
+use crate::view::in_game::underlay_ui::UnderlayUi;
 
 // Ingame ui
 #[derive(Default)]
@@ -26,7 +24,7 @@ impl QueensUi {
         });
         res?;
 
-        let (errors, game_won) = state.get_game_status()?;
+        let (errors, game_won) = state.get_win_status()?;
 
         // TODO only show these windows if debug
         if !errors.is_empty() {
