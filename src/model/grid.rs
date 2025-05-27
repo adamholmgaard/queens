@@ -1,3 +1,4 @@
+use crate::model::errors::{QueensError, QueensResult};
 use crate::model::tile::Tile;
 use std::fmt;
 use std::fmt::{Display, Formatter};
@@ -16,10 +17,10 @@ impl Grid {
 
         Grid { data, n }
     }
-    pub fn get_tile(&self, index: usize) -> Result<Tile, CoordinateError> {
+    pub fn get_tile(&self, index: usize) -> QueensResult<Tile> {
         match self.data.get(index) {
             Some(tile) => Ok(*tile),
-            None => Err(CoordinateError::OutOfBounds { c: index }),
+            None => Err(QueensError::OutOfBounds { c: index }),
         }
     }
 
@@ -36,10 +37,10 @@ impl Grid {
     }
 
     // Gives (col, row)
-    pub fn split_coordinate(&self, c: usize) -> Result<(usize, usize), CoordinateError> {
+    pub fn split_coordinate(&self, c: usize) -> QueensResult<(usize, usize)> {
         let n = self.n as usize;
         if c >= n.pow(2) {
-            return Err(CoordinateError::OutOfBounds { c });
+            return Err(QueensError::OutOfBounds { c });
         }
 
         let col = c % n;
@@ -48,10 +49,10 @@ impl Grid {
         Ok((col, row))
     }
 
-    pub fn merge_coordinate(&self, column: usize, row: usize) -> Result<usize, CoordinateError> {
+    pub fn merge_coordinate(&self, column: usize, row: usize) -> QueensResult<usize> {
         let n = self.n as usize;
         if column >= n || row >= n {
-            return Err(CoordinateError::Invalid2DCoordinates { column, row, n });
+            return Err(QueensError::Invalid2DCoordinate { column, row, n });
         }
 
         Ok(row * n + column)
@@ -61,17 +62,5 @@ impl Grid {
 impl Default for Grid {
     fn default() -> Self {
         Self::new(10)
-    }
-}
-
-#[derive(Debug, Clone)]
-pub enum CoordinateError {
-    OutOfBounds { c: usize },
-    Invalid2DCoordinates { column: usize, row: usize, n: usize },
-}
-
-impl Display for CoordinateError {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(f, "coord error todo")
     }
 }

@@ -1,3 +1,4 @@
+use crate::model::errors::QueensResult;
 use crate::model::state::State;
 use crate::model::tile::Tile;
 pub(crate) use crate::view::grid_ui::GridUi;
@@ -11,18 +12,21 @@ use log::debug;
 pub struct QueensUi {}
 
 impl QueensUi {
-    pub fn render(&self, ctx: &Context, state: &mut State) {
+    pub fn render(&self, ctx: &Context, state: &mut State) -> QueensResult<()> {
         let panel = CentralPanel::default();
 
         self.handle_keyboard_input(ctx, state);
 
+        let mut res = Ok(());
         panel.show(ctx, |ui| {
             UnderlayUi::render(ui, state);
-            GridUi::render(ui, state);
-            HighlightUI::render(ui, state);
+            res = res
+                .and_then(|_| GridUi::render(ui, state))
+                .and_then(|_| HighlightUI::render(ui, state));
         });
+        res?;
 
-        let (errors, game_won) = state.get_game_status();
+        let (errors, game_won) = state.get_game_status()?;
 
         // TODO only show these windows if debug
         if !errors.is_empty() {
@@ -40,6 +44,8 @@ impl QueensUi {
                 .anchor(Align2::RIGHT_TOP, Vec2::new(0.0, 15.0))
                 .show(ctx, |_| {});
         }
+
+        Ok(())
     }
 
     fn handle_keyboard_input(&self, ctx: &Context, state: &mut State) {

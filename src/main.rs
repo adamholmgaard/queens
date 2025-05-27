@@ -4,6 +4,7 @@ mod view;
 use crate::model::state::State;
 use eframe::egui::Context;
 use eframe::{egui, Frame};
+use log::warn;
 use view::queens_ui::QueensUi;
 // ONLY the main functionality
 
@@ -38,7 +39,10 @@ struct QueensApp {
 
 impl eframe::App for QueensApp {
     fn update(&mut self, ctx: &Context, _frame: &mut Frame) {
-        self.ui.render(ctx, &mut self.state);
-        // between game ui render
+        if let Err(e) = self.ui.render(ctx, &mut self.state) {
+            warn!("{}", e);
+            ctx.request_discard(e);
+            // if not debug give error box and restart game?
+        }
     }
 }

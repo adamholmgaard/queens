@@ -1,3 +1,4 @@
+use crate::model::errors::QueensResult;
 use crate::model::layout::{section, Area, Layout};
 use crate::model::state::State;
 use crate::model::tile::{Tile, TILE_SIZE};
@@ -8,24 +9,32 @@ use eframe::egui::{vec2, Color32, CornerRadius, Pos2, Rect, Stroke, StrokeKind, 
 pub struct HighlightUI {}
 
 impl HighlightUI {
-    pub fn render(ui: &mut Ui, state: &State) {
+    pub fn render(ui: &mut Ui, state: &State) -> QueensResult<()> {
         Self::render_areas(ui, state.clone());
-        Self::render_keyboard_mark(ui, state.clone());
+        Self::render_keyboard_mark(ui, state.clone())?;
+        Ok(())
     }
 
-    fn render_keyboard_mark(ui: &mut Ui, state: State) {
+    fn render_keyboard_mark(ui: &mut Ui, state: State) -> QueensResult<()> {
         if let Some(i) = state.get_marked() {
-            Self::highlight(ui, state.clone(), Area::from_usize(i, 0), Color32::GRAY);
+            Self::highlight(ui, state.clone(), Area::from_usize(i, 0), Color32::GRAY)?;
         }
+        Ok(())
     }
 
-    fn render_areas(ui: &mut Ui, state: State) {
+    fn render_areas(ui: &mut Ui, state: State) -> QueensResult<()> {
         for x in state.get_layout().get_areas() {
-            //Self::highlight(ui, state.clone(), x.clone(), Color32::GRAY);
+            //Self::highlight(ui, state.clone(), x.clone(), Color32::GRAY)?;
         }
+        Ok(())
     }
 
-    pub fn highlight(ui: &mut Ui, state: State, area: Area, highlight_color: Color32) {
+    pub fn highlight(
+        ui: &mut Ui,
+        state: State,
+        area: Area,
+        highlight_color: Color32,
+    ) -> QueensResult<()> {
         // backgroundcolor, bordercolor
         let window_margin = ui.spacing().window_margin;
         let pad = window_margin.leftf();
@@ -37,12 +46,10 @@ impl HighlightUI {
 
         for column in 0..n {
             for row in 0..n {
-                if area.get_sections().contains(
-                    &state
-                        .get_grid()
-                        .merge_coordinate(column, row)
-                        .expect("error"),
-                ) {
+                if area
+                    .get_sections()
+                    .contains(&state.get_grid().merge_coordinate(column, row)?)
+                {
                     let tile_side = TILE_SIZE.x;
                     let upper_left = upper_left_corner
                         + Vec2::new(
@@ -64,5 +71,6 @@ impl HighlightUI {
                 }
             }
         }
+        Ok(())
     }
 }

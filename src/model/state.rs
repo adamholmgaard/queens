@@ -1,5 +1,6 @@
-use crate::model::game_error::GameError;
-use crate::model::grid::{CoordinateError, Grid};
+use crate::model::errors::{QueensError, QueensResult};
+use crate::model::game_rule_broken::GameRuleBroken;
+use crate::model::grid::Grid;
 use crate::model::layout::{complex_layout, Layout};
 use crate::model::tile::Tile;
 use log::{debug, warn};
@@ -33,7 +34,7 @@ impl State {
         self.layout.clone()
     }
 
-    pub fn get_tile(&self, x: usize) -> Result<Tile, CoordinateError> {
+    pub fn get_tile(&self, x: usize) -> QueensResult<Tile> {
         self.grid.get_tile(x)
     }
 
@@ -41,19 +42,14 @@ impl State {
         self.grid.set_tile(x, tile);
     }
 
-    pub fn flip_tile(&mut self, c: usize) {
-        match self.grid.get_tile(c) {
-            Ok(tile) => {
-                debug!("on_tile_click ({})", c);
-                self.grid.set_tile(c, tile.on_click());
-            }
-            Err(err) => {
-                warn!("{:?}", err);
-            }
-        }
+    pub fn flip_tile(&mut self, c: usize) -> QueensResult<()> {
+        self.grid.get_tile(c).and_then(|tile| {
+            self.grid.set_tile(c, tile.on_click());
+            Ok(())
+        })
     }
 
-    pub fn get_game_status(&self) -> (Vec<GameError>, bool) {
+    pub fn get_game_status(&self) -> QueensResult<(Vec<GameRuleBroken>, bool)> {
         let n = self.get_n();
         let mut errors = Vec::new();
         let mut rows = Vec::new();
@@ -63,33 +59,25 @@ impl State {
         for (index, tile) in self.grid.get_data().iter().enumerate() {
             if tile.is_set() {
                 let color = tile.get_color();
-                let (col, row) = self
-                    .grid
-                    .split_coordinate(index)
-                    .expect("could not convert");
+                let (col, row) = self.grid.split_coordinate(index)?;
 
                 if rows.contains(&row) {
-                    errors.push(GameError::Row { row })
+                    errors.push(GameRuleBroken::Row { row })
                 } else {
                     rows.push(row);
                 }
 
                 if cols.contains(&col) {
-                    errors.push(GameError::Column { col })
+                    errors.push(GameRuleBroken::Column { col })
                 } else {
                     cols.push(col);
                 }
 
                 if colors.contains(&color) {
-                    errors.push(GameError::Area {
+                    errors.push(GameRuleBroken::Area {
                         area: self
                             .layout
-                            .get_area(
-                                self.grid
-                                    .merge_coordinate(col, row)
-                                    .expect("Index out of bounds"),
-                            )
-                            .expect("Index out of bounds"),
+                            .get_area(self.grid.merge_coordinate(col, row)?)?,
                     })
                 } else {
                     colors.push(color)
@@ -99,7 +87,7 @@ impl State {
                     // is not all the way to the right
                     let below_right = index + n + 1;
                     if self.grid.get_tile(below_right).is_ok_and(|t| t.is_set()) {
-                        errors.push(GameError::Diagonal {
+                        errors.push(GameRuleBroken::Diagonal {
                             c1: index,
                             c2: below_right,
                         })
@@ -110,7 +98,7 @@ impl State {
                     // is not all the way to the left
                     let below_left = index + n - 1;
                     if self.grid.get_tile(below_left).is_ok_and(|t| t.is_set()) {
-                        errors.push(GameError::Diagonal {
+                        errors.push(GameRuleBroken::Diagonal {
                             c1: index,
                             c2: below_left,
                         })
@@ -119,13 +107,13 @@ impl State {
             }
         }
 
-        (
+        Ok((
             errors.clone(),
             (rows.len() == n)
                 && (cols.len() == n)
                 && (colors.len() == n)
                 && errors.clone().is_empty(),
-        )
+        ))
     }
 }
 

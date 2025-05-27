@@ -1,3 +1,4 @@
+use crate::model::errors::{QueensError, QueensResult};
 use rand::prelude::SliceRandom;
 use rand::Rng;
 use std::ops::{Range, RangeInclusive};
@@ -101,14 +102,14 @@ impl Layout {
         Self { areas }
     }
 
-    pub fn get_area(&self, index: usize) -> Result<Area, &str> {
+    pub fn get_area(&self, index: usize) -> QueensResult<Area> {
         for a in self.areas.iter() {
             if a.sections.contains(&index) {
                 return Ok(a.clone());
             }
         }
 
-        Err("No area found for index")
+        Err(QueensError::AreaNotFound { c: index })
     }
 }
 
