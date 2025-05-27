@@ -115,7 +115,7 @@ impl Layout {
 
 impl Default for Layout {
     fn default() -> Self {
-        generate_layout()
+        easy_layout()
     }
 }
 

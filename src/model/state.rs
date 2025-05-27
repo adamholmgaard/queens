@@ -6,8 +6,8 @@ use crate::model::tile::Tile;
 
 #[derive(Default, Clone)]
 pub enum GameState {
-    MainMenu,
     #[default] // default is ingame until main menu is fully functional
+    MainMenu,
     InGame,
     Won,
 }
@@ -18,11 +18,16 @@ pub struct State {
     layout: Layout,
     game_state: GameState,
     marked: Option<usize>,
+    n: usize,
 }
 
 impl State {
     pub fn get_n(&self) -> usize {
-        self.grid.get_n()
+        self.n
+    }
+
+    pub fn set_n(&mut self, n: usize) {
+        self.n = n;
     }
 
     pub fn get_grid(&self) -> Grid {
@@ -149,6 +154,7 @@ impl Default for State {
             layout,
             marked: None,
             game_state: GameState::default(),
+            n: 10,
         }
     }
 }

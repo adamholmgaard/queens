@@ -4,12 +4,14 @@ mod model;
 mod view;
 
 use crate::model::state::{GameState, State};
-use eframe::egui::Context;
+use crate::view::in_game::in_game_ui::InGameUi;
+use crate::view::main_menu::main_menu_ui::MainMenuUi;
+use eframe::egui::{Align2, CentralPanel, Context, Key, Vec2, Window};
 use eframe::{egui, Frame};
 use errors::QueensResult;
 use log::warn;
-use crate::view::in_game::queens_ui::QueensUi;
-use crate::view::main_menu::main_menu_ui::MainMenuUi;
+use std::thread::sleep;
+use std::time::Duration;
 // ONLY the main functionality
 
 fn main() -> eframe::Result {
@@ -37,7 +39,7 @@ fn main() -> eframe::Result {
 #[derive(Default)]
 struct QueensApp {
     state: State,
-    in_game_ui: QueensUi,
+    in_game_ui: InGameUi,
     main_menu_ui: MainMenuUi,
 }
 
@@ -46,7 +48,7 @@ impl eframe::App for QueensApp {
         if let Err(e) = match self.state.get_game_state() {
             GameState::InGame => self.render_in_game(ctx),
             GameState::MainMenu => self.render_main_menu(ctx),
-            GameState::Won => todo!(),
+            GameState::Won => self.render_won(ctx),
         } {
             warn!("{}", e); // if not debug give error window?
 
@@ -64,5 +66,23 @@ impl QueensApp {
 
     fn render_main_menu(&mut self, ctx: &Context) -> QueensResult<()> {
         self.main_menu_ui.render(ctx, &mut self.state)
+    }
+
+    fn render_won(&mut self, ctx: &Context) -> QueensResult<()> {
+        CentralPanel::default().show(ctx, |ui| {
+            ui.vertical(|ui| {
+                ui.label("You won!");
+                if ui.button("Press to start over").clicked() {
+                    // Reset the whole state such that the board is fresh
+                    self.state = State::default();
+                }
+            })
+        });
+
+        if ctx.input(|x| x.key_pressed(Key::Space) || x.key_pressed(Key::Enter)) {
+            self.state = State::default();
+        }
+
+        Ok(())
     }
 }

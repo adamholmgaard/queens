@@ -1,15 +1,16 @@
 use crate::errors::QueensResult;
-use crate::model::state::State;
-use eframe::egui::{vec2, Align2, Area, Button, CentralPanel, Context, Id, Key, Ui, Vec2, Window};
+use crate::model::state::{GameState, State};
 use crate::view::in_game::grid_ui::GridUi;
 use crate::view::in_game::highlight_ui::HighlightUI;
 use crate::view::in_game::underlay_ui::UnderlayUi;
+use eframe::egui::{vec2, Align2, Area, Button, CentralPanel, Context, Id, Key, Ui, Vec2, Window};
+use std::thread::sleep;
+use std::time::Duration;
 
-// Ingame ui
 #[derive(Default)]
-pub struct QueensUi {}
+pub struct InGameUi {}
 
-impl QueensUi {
+impl InGameUi {
     pub fn render(&self, ctx: &Context, state: &mut State) -> QueensResult<()> {
         let panel = CentralPanel::default();
 
@@ -38,9 +39,7 @@ impl QueensUi {
         }
 
         if game_won {
-            Window::new("You won!")
-                .anchor(Align2::RIGHT_TOP, Vec2::new(0.0, 15.0))
-                .show(ctx, |_| {});
+            state.set_game_state(GameState::Won);
         }
 
         Ok(())
