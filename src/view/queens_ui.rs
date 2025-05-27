@@ -14,76 +14,9 @@ pub struct QueensUi {}
 impl QueensUi {
     pub fn render(&self, ctx: &Context, state: &mut State) {
         let panel = CentralPanel::default();
-        let n = state.get_n();
-
-        if ctx.input(|x| x.key_pressed(Key::ArrowRight)) {
-            let new_coord = match state.get_marked() {
-                None => Coordinate::from(0),
-                Some(c) => {
-                    // todo impl ord for coordinate
-                    let raw = c.get();
-                    if raw % n == n - 1 {
-                        c + 1 - n
-                    } else {
-                        c + 1
-                    }
-                }
-            };
-            state.set_marked(Some(new_coord));
-        }
-        if ctx.input(|x| x.key_pressed(Key::ArrowLeft)) {
-            let new_coord = match state.get_marked() {
-                None => Coordinate::from(0),
-                Some(c) => {
-                    let raw = c.get();
-                    if raw % n == 0 {
-                        c + n - 1
-                    } else {
-                        c - 1
-                    }
-                }
-            };
-            state.set_marked(Some(new_coord));
-        }
-        if ctx.input(|x| x.key_pressed(Key::ArrowDown)) {
-            let new_coord = match state.get_marked() {
-                None => Coordinate::from(0),
-                Some(c) => {
-                    let raw = c.get();
-                    if raw >= n * (n - 1) {
-                        c + n - n * n
-                    } else {
-                        c + n
-                    }
-                }
-            };
-            state.set_marked(Some(new_coord));
-        }
-        if ctx.input(|x| x.key_pressed(Key::ArrowUp)) {
-            let new_coord = match state.get_marked() {
-                None => Coordinate::from(0),
-                Some(c) => {
-                    let raw = c.get();
-                    if raw < n {
-                        c + n * (n - 1)
-                    } else {
-                        c - n
-                    }
-                }
-            };
-            state.set_marked(Some(new_coord));
-        }
-        if ctx.input(|x| x.key_pressed(Key::Escape)) {
-            state.set_marked(None);
-        }
-        if ctx.input(|x| x.key_pressed(Key::Space) || x.key_pressed(Key::Enter)) {
-            if let Some(c) = state.get_marked() {
-                state.flip_tile(c);
-            }
-        }
-
-        debug!("{:?} is marked", state.get_marked());
-
+        
+        self.handle_keyboard_input(ctx, state);
+        
         panel.show(ctx, |ui| {
             UnderlayUi::render(ui, state);
             GridUi::render(ui, state);
@@ -107,6 +40,110 @@ impl QueensUi {
             Window::new("You won!")
                 .anchor(Align2::RIGHT_TOP, Vec2::new(0.0, 15.0))
                 .show(ctx, |_| {});
+        }
+    }
+    
+    fn handle_keyboard_input(&self, ctx: &Context, state: &mut State) {
+        let n = state.get_n();
+        
+        let cmd_ctrl_pressed = ctx.input(|x| x.modifiers.command_only());
+
+        if ctx.input(|x| x.key_pressed(Key::ArrowRight)) {
+            let new_coord = match state.get_marked() {
+                None => Coordinate::from(0),
+                Some(c) => {
+                    // todo impl ord for coordinate
+                    let raw = c.get();
+                    if cmd_ctrl_pressed {
+                        if raw % n == n - 1 {
+                            c
+                        } else {
+                            c + (n - (raw % n)) -1
+                        }
+                    } else {
+                        if raw % n == n - 1 {
+                            c + 1 - n
+                        } else {
+                            c + 1
+                        }
+                    }
+                }
+            };
+            state.set_marked(Some(new_coord));
+        }
+        if ctx.input(|x| x.key_pressed(Key::ArrowLeft)) {
+            let new_coord = match state.get_marked() {
+                None => Coordinate::from(0),
+                Some(c) => {
+                    let raw = c.get();
+                    if cmd_ctrl_pressed {
+                        if raw % n == 0 {
+                            c
+                        } else {
+                            c - (raw % n)
+                        }
+                    } else {
+                        if raw % n == 0 {
+                            c + n - 1
+                        } else {
+                            c - 1
+                        }
+                    }
+                }
+            };
+            state.set_marked(Some(new_coord));
+        }
+        if ctx.input(|x| x.key_pressed(Key::ArrowDown)) {
+            let new_coord = match state.get_marked() {
+                None => Coordinate::from(0),
+                Some(c) => {
+                    let raw = c.get();
+                    if cmd_ctrl_pressed {
+                        if raw >= n * (n - 1) {
+                            c
+                        } else {
+                            Coordinate::from(n*(n-1) + (raw % n))
+                        }
+                    } else {
+                        if raw >= n * (n - 1) {
+                            c + n - n * n
+                        } else {
+                            c + n
+                        }   
+                    }
+                }
+            };
+            state.set_marked(Some(new_coord));
+        }
+        if ctx.input(|x| x.key_pressed(Key::ArrowUp)) {
+            let new_coord = match state.get_marked() {
+                None => Coordinate::from(0),
+                Some(c) => {
+                    let raw = c.get();
+                    if  cmd_ctrl_pressed {
+                        if raw < n {
+                            c
+                        } else {
+                            Coordinate::from(raw % n)
+                        }
+                    } else {
+                        if raw < n {
+                            c + n * (n - 1)
+                        } else {
+                            c - n
+                        }
+                    }
+                }
+            };
+            state.set_marked(Some(new_coord));
+        }
+        if ctx.input(|x| x.key_pressed(Key::Escape)) {
+            state.set_marked(None);
+        }
+        if ctx.input(|x| x.key_pressed(Key::Space) || x.key_pressed(Key::Enter)) {
+            if let Some(c) = state.get_marked() {
+                state.flip_tile(c);
+            }
         }
     }
 }
