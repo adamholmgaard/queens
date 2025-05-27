@@ -1,6 +1,5 @@
-use crate::model::coordinate::{Coordinate, CoordinateError};
 use crate::model::game_error::GameError;
-use crate::model::grid::Grid;
+use crate::model::grid::{CoordinateError, Grid};
 use crate::model::layout::{complex_layout, Layout};
 use crate::model::tile::Tile;
 use log::{debug, warn};
@@ -10,7 +9,7 @@ pub struct State {
     //  gamestate : enum{ingame, won, lost, pregame...}
     grid: Grid,
     layout: Layout,
-    marked: Option<Coordinate>,
+    marked: Option<usize>,
 }
 
 impl State {
@@ -22,11 +21,11 @@ impl State {
         self.grid.clone()
     }
 
-    pub fn get_marked(&self) -> Option<Coordinate> {
+    pub fn get_marked(&self) -> Option<usize> {
         self.marked
     }
 
-    pub fn set_marked(&mut self, marked: Option<Coordinate>) {
+    pub fn set_marked(&mut self, marked: Option<usize>) {
         self.marked = marked;
     }
 
@@ -34,15 +33,15 @@ impl State {
         self.layout.clone()
     }
 
-    pub fn get_tile(&self, x: Coordinate) -> Tile {
-        self.grid.get_tile(x).expect("no tile found")
+    pub fn get_tile(&self, x: usize) -> Result<Tile, CoordinateError> {
+        self.grid.get_tile(x)
     }
 
-    pub fn set_tile(&mut self, x: Coordinate, tile: Tile) {
+    pub fn set_tile(&mut self, x: usize, tile: Tile) {
         self.grid.set_tile(x, tile);
     }
 
-    pub fn flip_tile(&mut self, c: Coordinate) {
+    pub fn flip_tile(&mut self, c: usize) {
         match self.grid.get_tile(c) {
             Ok(tile) => {
                 debug!("on_tile_click ({})", c);
@@ -64,8 +63,9 @@ impl State {
         for (index, tile) in self.grid.get_data().iter().enumerate() {
             if tile.is_set() {
                 let color = tile.get_color();
-                let (row, col) = Coordinate::from(index)
-                    .to_coords(n)
+                let (col, row) = self
+                    .grid
+                    .split_coordinate(index)
                     .expect("could not convert");
 
                 if rows.contains(&row) {
@@ -86,8 +86,7 @@ impl State {
                             .layout
                             .get_area(
                                 self.grid
-                                    .clone()
-                                    .coord_from_indices(row, col)
+                                    .merge_coordinate(col, row)
                                     .expect("Index out of bounds"),
                             )
                             .expect("Index out of bounds"),
@@ -99,14 +98,10 @@ impl State {
                 if index % n != n - 1 {
                     // is not all the way to the right
                     let below_right = index + n + 1;
-                    if self
-                        .grid
-                        .get_tile(Coordinate::from(below_right))
-                        .is_ok_and(|t| t.is_set())
-                    {
+                    if self.grid.get_tile(below_right).is_ok_and(|t| t.is_set()) {
                         errors.push(GameError::Diagonal {
-                            c1: Coordinate::from(index),
-                            c2: Coordinate::from(below_right),
+                            c1: index,
+                            c2: below_right,
                         })
                     }
                 }
@@ -114,14 +109,10 @@ impl State {
                 if index % n != 0 {
                     // is not all the way to the left
                     let below_left = index + n - 1;
-                    if self
-                        .grid
-                        .get_tile(Coordinate::from(below_left))
-                        .is_ok_and(|t| t.is_set())
-                    {
+                    if self.grid.get_tile(below_left).is_ok_and(|t| t.is_set()) {
                         errors.push(GameError::Diagonal {
-                            c1: Coordinate::from(index),
-                            c2: Coordinate::from(below_left),
+                            c1: index,
+                            c2: below_left,
                         })
                     }
                 }
@@ -145,7 +136,7 @@ impl Default for State {
 
         for area in layout.get_areas() {
             for index in area.get_sections().clone() {
-                grid.set_tile(Coordinate::from(index), Tile::new(false, area.get_color()));
+                grid.set_tile(index, Tile::new(false, area.get_color()));
             }
         }
 

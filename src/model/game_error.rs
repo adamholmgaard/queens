@@ -1,4 +1,3 @@
-use crate::model::coordinate::Coordinate;
 use crate::model::layout::Area;
 use std::fmt::{Display, Formatter};
 
@@ -7,7 +6,7 @@ pub enum GameError {
     Row { row: usize },
     Column { col: usize },
     Area { area: Area },
-    Diagonal { c1: Coordinate, c2: Coordinate }, // add coordinate struct
+    Diagonal { c1: usize, c2: usize }, // add coordinate struct
 }
 
 impl Display for GameError {

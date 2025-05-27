@@ -1,5 +1,3 @@
-use crate::model::coordinate::Coordinate;
-use crate::model::distinct_colors::get_distinct_color;
 use crate::model::layout::{section, Area, Layout};
 use crate::model::state::State;
 use crate::model::tile::{Tile, TILE_SIZE};
@@ -17,12 +15,7 @@ impl HighlightUI {
 
     fn render_keyboard_mark(ui: &mut Ui, state: State) {
         if let Some(i) = state.get_marked() {
-            Self::highlight(
-                ui,
-                state.clone(),
-                Area::from_usize(i.get(), 0),
-                Color32::GRAY,
-            );
+            Self::highlight(ui, state.clone(), Area::from_usize(i, 0), Color32::GRAY);
         }
     }
 
@@ -35,43 +28,41 @@ impl HighlightUI {
     pub fn highlight(ui: &mut Ui, state: State, area: Area, highlight_color: Color32) {
         // backgroundcolor, bordercolor
         let window_margin = ui.spacing().window_margin;
-        let pad = Vec2::splat(window_margin.leftf());
+        let pad = window_margin.leftf();
         let n = state.get_n();
 
-        let upper_left_corner = pad.to_pos2() + Vec2::new(2.5, 2.5);
+        let upper_left_corner = Pos2::new(pad, pad) + Vec2::new(2.5, 2.5);
 
-        ui.vertical(|ui| {
-            ui.spacing_mut().item_spacing = Vec2::splat(window_margin.leftf());
+        ui.spacing_mut().item_spacing = Vec2::splat(window_margin.leftf());
 
-            for i in 0..n {
-                ui.horizontal(|ui| {
-                    for j in 0..n {
-                        if area
-                            .get_sections()
-                            .contains(&Coordinate::from_context(j, i, n as u8).unwrap().get())
-                        {
-                            let tile_side = TILE_SIZE.x;
-                            let upper_left = upper_left_corner
-                                + Vec2::new(
-                                    i as f32 * (tile_side + pad.x),
-                                    j as f32 * (tile_side + pad.x),
-                                );
-                            let upper_right = TILE_SIZE.to_pos2() + upper_left.to_vec2();
+        for column in 0..n {
+            for row in 0..n {
+                if area.get_sections().contains(
+                    &state
+                        .get_grid()
+                        .merge_coordinate(column, row)
+                        .expect("error"),
+                ) {
+                    let tile_side = TILE_SIZE.x;
+                    let upper_left = upper_left_corner
+                        + Vec2::new(
+                            column as f32 * (tile_side + pad),
+                            row as f32 * (tile_side + pad),
+                        );
+                    let upper_right = TILE_SIZE.to_pos2() + upper_left.to_vec2();
 
-                            ui.painter().rect(
-                                Rect::from_min_max(
-                                    upper_left - Vec2::splat(1.0),
-                                    upper_right + Vec2::splat(1.0),
-                                ),
-                                2,
-                                highlight_color.gamma_multiply_u8(127),
-                                Stroke::new(1.0, Color32::WHITE),
-                                StrokeKind::Middle,
-                            );
-                        }
-                    }
-                });
+                    ui.painter().rect(
+                        Rect::from_min_max(
+                            upper_left - Vec2::splat(1.0),
+                            upper_right + Vec2::splat(1.0),
+                        ),
+                        2,
+                        highlight_color.gamma_multiply_u8(127),
+                        Stroke::new(1.0, Color32::WHITE),
+                        StrokeKind::Middle,
+                    );
+                }
             }
-        });
+        }
     }
 }

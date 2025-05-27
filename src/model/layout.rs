@@ -1,5 +1,3 @@
-use crate::model::coordinate::Coordinate;
-use log::debug;
 use rand::prelude::SliceRandom;
 use rand::Rng;
 use std::ops::{Range, RangeInclusive};
@@ -103,14 +101,14 @@ impl Layout {
         Self { areas }
     }
 
-    pub fn get_area(&self, index: Coordinate) -> Result<Area, &str> {
+    pub fn get_area(&self, index: usize) -> Result<Area, &str> {
         for a in self.areas.iter() {
-            if a.sections.contains(&index.get()) {
+            if a.sections.contains(&index) {
                 return Ok(a.clone());
             }
         }
 
-        Err("No colored area found for index")
+        Err("No area found for index")
     }
 }
 

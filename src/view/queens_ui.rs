@@ -1,4 +1,3 @@
-use crate::model::coordinate::Coordinate;
 use crate::model::state::State;
 use crate::model::tile::Tile;
 pub(crate) use crate::view::grid_ui::GridUi;
@@ -14,9 +13,9 @@ pub struct QueensUi {}
 impl QueensUi {
     pub fn render(&self, ctx: &Context, state: &mut State) {
         let panel = CentralPanel::default();
-        
+
         self.handle_keyboard_input(ctx, state);
-        
+
         panel.show(ctx, |ui| {
             UnderlayUi::render(ui, state);
             GridUi::render(ui, state);
@@ -42,26 +41,25 @@ impl QueensUi {
                 .show(ctx, |_| {});
         }
     }
-    
+
     fn handle_keyboard_input(&self, ctx: &Context, state: &mut State) {
         let n = state.get_n();
-        
+
         let cmd_ctrl_pressed = ctx.input(|x| x.modifiers.command_only());
+        let default_marked = 0;
 
         if ctx.input(|x| x.key_pressed(Key::ArrowRight)) {
             let new_coord = match state.get_marked() {
-                None => Coordinate::from(0),
+                None => default_marked,
                 Some(c) => {
-                    // todo impl ord for coordinate
-                    let raw = c.get();
                     if cmd_ctrl_pressed {
-                        if raw % n == n - 1 {
+                        if c % n == n - 1 {
                             c
                         } else {
-                            c + (n - (raw % n)) -1
+                            c + (n - (c % n)) - 1
                         }
                     } else {
-                        if raw % n == n - 1 {
+                        if c % n == n - 1 {
                             c + 1 - n
                         } else {
                             c + 1
@@ -73,17 +71,16 @@ impl QueensUi {
         }
         if ctx.input(|x| x.key_pressed(Key::ArrowLeft)) {
             let new_coord = match state.get_marked() {
-                None => Coordinate::from(0),
+                None => default_marked,
                 Some(c) => {
-                    let raw = c.get();
                     if cmd_ctrl_pressed {
-                        if raw % n == 0 {
+                        if c % n == 0 {
                             c
                         } else {
-                            c - (raw % n)
+                            c - (c % n)
                         }
                     } else {
-                        if raw % n == 0 {
+                        if c % n == 0 {
                             c + n - 1
                         } else {
                             c - 1
@@ -95,21 +92,20 @@ impl QueensUi {
         }
         if ctx.input(|x| x.key_pressed(Key::ArrowDown)) {
             let new_coord = match state.get_marked() {
-                None => Coordinate::from(0),
+                None => default_marked,
                 Some(c) => {
-                    let raw = c.get();
                     if cmd_ctrl_pressed {
-                        if raw >= n * (n - 1) {
+                        if c >= n * (n - 1) {
                             c
                         } else {
-                            Coordinate::from(n*(n-1) + (raw % n))
+                            n * (n - 1) + (c % n)
                         }
                     } else {
-                        if raw >= n * (n - 1) {
+                        if c >= n * (n - 1) {
                             c + n - n * n
                         } else {
                             c + n
-                        }   
+                        }
                     }
                 }
             };
@@ -117,17 +113,16 @@ impl QueensUi {
         }
         if ctx.input(|x| x.key_pressed(Key::ArrowUp)) {
             let new_coord = match state.get_marked() {
-                None => Coordinate::from(0),
+                None => default_marked,
                 Some(c) => {
-                    let raw = c.get();
-                    if  cmd_ctrl_pressed {
-                        if raw < n {
+                    if cmd_ctrl_pressed {
+                        if c < n {
                             c
                         } else {
-                            Coordinate::from(raw % n)
+                            c % n
                         }
                     } else {
-                        if raw < n {
+                        if c < n {
                             c + n * (n - 1)
                         } else {
                             c - n

@@ -1,5 +1,6 @@
-use crate::model::coordinate::{Coordinate, CoordinateError};
 use crate::model::tile::Tile;
+use std::fmt;
+use std::fmt::{Display, Formatter};
 
 // 0-indexed square matrix of tiles.
 #[derive(Clone, Debug)]
@@ -15,30 +16,15 @@ impl Grid {
 
         Grid { data, n }
     }
-    pub fn get_tile(&self, index: Coordinate) -> Result<Tile, CoordinateError> {
-        match self.data.get(index.get()) {
+    pub fn get_tile(&self, index: usize) -> Result<Tile, CoordinateError> {
+        match self.data.get(index) {
             Some(tile) => Ok(*tile),
-            None => Err(CoordinateError::default()),
+            None => Err(CoordinateError::OutOfBounds { c: index }),
         }
     }
 
-    pub fn get_tile_by_indices(&self, row: isize, col: isize) -> Result<Tile, CoordinateError> {
-        // fix the usize underflow problem!!
-        if row < 0 {
-            return Err(CoordinateError::default());
-        }
-        if col < 0 {
-            return Err(CoordinateError::default());
-        }
-
-        let index = self
-            .clone()
-            .coord_from_indices(row as usize, col as usize)?;
-        self.get_tile(index)
-    }
-
-    pub fn set_tile(&mut self, index: Coordinate, tile: Tile) {
-        self.data[index.get()] = tile;
+    pub fn set_tile(&mut self, index: usize, tile: Tile) {
+        self.data[index] = tile;
     }
 
     pub fn get_n(&self) -> usize {
@@ -49,13 +35,43 @@ impl Grid {
         &self.data
     }
 
-    pub fn coord_from_indices(self, col: usize, row: usize) -> Result<Coordinate, CoordinateError> {
-        Coordinate::from_context(col, row, self.n)
+    // Gives (col, row)
+    pub fn split_coordinate(&self, c: usize) -> Result<(usize, usize), CoordinateError> {
+        let n = self.n as usize;
+        if c >= n.pow(2) {
+            return Err(CoordinateError::OutOfBounds { c });
+        }
+
+        let col = c % n;
+        let row = c.div_euclid(n);
+
+        Ok((col, row))
+    }
+
+    pub fn merge_coordinate(&self, column: usize, row: usize) -> Result<usize, CoordinateError> {
+        let n = self.n as usize;
+        if column >= n || row >= n {
+            return Err(CoordinateError::Invalid2DCoordinates { column, row, n });
+        }
+
+        Ok(row * n + column)
     }
 }
 
 impl Default for Grid {
     fn default() -> Self {
         Self::new(10)
+    }
+}
+
+#[derive(Debug, Clone)]
+pub enum CoordinateError {
+    OutOfBounds { c: usize },
+    Invalid2DCoordinates { column: usize, row: usize, n: usize },
+}
+
+impl Display for CoordinateError {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        write!(f, "coord error todo")
     }
 }
