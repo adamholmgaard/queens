@@ -32,7 +32,7 @@ impl From<RangeInclusive<usize>> for Section {
     }
 }
 
-fn section<R: Into<Section>>(c: R) -> Section {
+pub fn section<R: Into<Section>>(c: R) -> Section {
     c.into()
 }
 
@@ -44,7 +44,7 @@ pub struct Area {
 }
 
 impl Area {
-    fn from_sections(sections: Vec<Section>, col: u8) -> Area {
+    pub fn from_sections(sections: Vec<Section>, color: u8) -> Area {
         let mut res = Vec::new();
 
         for section in sections {
@@ -55,8 +55,12 @@ impl Area {
 
         Self {
             sections: res,
-            color: col,
+            color,
         }
+    }
+
+    pub fn from_usize(i: usize, color: u8) -> Area {
+        Self::from_sections(vec![section(i)], color)
     }
 
     pub fn get_sections(&self) -> &Vec<usize> {
@@ -266,7 +270,7 @@ pub fn generate_layout() -> Layout {
     while number_placed < size {
         // we do n - 1 to guarantee an area of one tile.
         // consider doing a skewed distribution instead like Poisson.
-        let area_chosen_index = rng.random_range(0..n - 1);  
+        let area_chosen_index = rng.random_range(0..n - 1);
         let area_chosen = areas.get(area_chosen_index).unwrap().clone();
 
         let y = rng.random_range(0..area_chosen.len());

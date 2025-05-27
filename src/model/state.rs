@@ -3,13 +3,14 @@ use crate::model::game_error::GameError;
 use crate::model::grid::Grid;
 use crate::model::layout::{complex_layout, Layout};
 use crate::model::tile::Tile;
-use log::warn;
+use log::{debug, warn};
 
 #[derive(Clone)]
 pub struct State {
     //  gamestate : enum{ingame, won, lost, pregame...}
     grid: Grid,
     layout: Layout,
+    marked: Option<Coordinate>,
 }
 
 impl State {
@@ -19,6 +20,14 @@ impl State {
 
     pub fn get_grid(&self) -> Grid {
         self.grid.clone()
+    }
+
+    pub fn get_marked(&self) -> Option<Coordinate> {
+        self.marked
+    }
+
+    pub fn set_marked(&mut self, marked: Option<Coordinate>) {
+        self.marked = marked;
     }
 
     pub fn get_layout(&self) -> Layout {
@@ -31,6 +40,18 @@ impl State {
 
     pub fn set_tile(&mut self, x: Coordinate, tile: Tile) {
         self.grid.set_tile(x, tile);
+    }
+
+    pub fn flip_tile(&mut self, c: Coordinate) {
+        match self.grid.get_tile(c) {
+            Ok(tile) => {
+                debug!("on_tile_click ({})", c);
+                self.grid.set_tile(c, tile.on_click());
+            }
+            Err(err) => {
+                warn!("{:?}", err);
+            }
+        }
     }
 
     pub fn get_game_status(&self) -> (Vec<GameError>, bool) {
@@ -128,6 +149,10 @@ impl Default for State {
             }
         }
 
-        Self { grid, layout }
+        Self {
+            grid,
+            layout,
+            marked: None,
+        }
     }
 }

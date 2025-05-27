@@ -1,5 +1,6 @@
 use std::fmt;
 use std::fmt::{Display, Formatter};
+use std::ops::{Add, Sub};
 
 #[derive(Debug, Clone, Default)]
 pub struct CoordinateError {
@@ -96,5 +97,45 @@ impl From<ContextCoordinate> for Coordinate {
 impl Display for Coordinate {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.raw)
+    }
+}
+
+impl Add for Coordinate {
+    type Output = Coordinate;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Coordinate {
+            raw: self.raw + rhs.raw,
+        }
+    }
+}
+
+impl Add<usize> for Coordinate {
+    type Output = Coordinate;
+
+    fn add(self, rhs: usize) -> Self::Output {
+        Coordinate {
+            raw: self.raw + rhs,
+        }
+    }
+}
+
+impl Sub for Coordinate {
+    type Output = Coordinate;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        Coordinate {
+            raw: self.raw - rhs.raw,
+        }
+    }
+}
+
+impl Sub<usize> for Coordinate {
+    type Output = Coordinate;
+
+    fn sub(self, rhs: usize) -> Self::Output {
+        Coordinate {
+            raw: self.raw - rhs,
+        }
     }
 }

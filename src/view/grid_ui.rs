@@ -21,9 +21,7 @@ impl GridUi {
 
                         let tile: Tile = state.get_tile(coord);
                         if ui.add(tile).clicked() {
-                            debug!("on_tile_click ({})", coord);
-
-                            state.set_tile(coord, tile.on_click());
+                            state.flip_tile(coord);
                         }
                     }
                 });
