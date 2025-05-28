@@ -13,7 +13,9 @@ impl MainMenuUi {
                 ui.label("This is the main menu");
                 let mut n = state.get_n();
                 ui.add(Slider::new(&mut n, 6..=12).text("Set n (can only be 10 right now)"));
-                state.set_n(n);
+                state.set_n(10);
+                
+                // todo set whether or not to move marker across sides
 
                 if ui.button("Play").clicked() {
                     state.set_game_state(GameState::InGame);
