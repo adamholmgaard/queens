@@ -24,6 +24,7 @@ impl HighlightUI {
 
     fn render_areas(ui: &mut Ui, state: State) -> QueensResult<()> {
         for x in state.get_layout().get_areas() {
+            // TODO highlight areas with correct borders
             //Self::highlight(ui, state.clone(), x.clone(), Color32::GRAY)?;
         }
         Ok(())

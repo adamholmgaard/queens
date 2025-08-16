@@ -23,8 +23,6 @@ impl InGameUi {
         });
         res?;
 
-        let in_game_state = state.in_game_mut();
-
         let (errors, game_won) = state.get_win_status()?;
 
         // TODO only show these windows if debug

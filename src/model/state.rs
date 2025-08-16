@@ -1,4 +1,4 @@
-use crate::errors::QueensResult;
+use crate::errors::{QueensError, QueensResult};
 use crate::model::game_rule_broken::GameRuleBroken;
 use crate::model::grid::Grid;
 use crate::model::layout::{Layout, LayoutType};
@@ -47,51 +47,51 @@ impl State {
         self.n
     }
 
-    pub fn in_game_mut(&mut self) -> &mut InGameState {
+    fn in_game_mut(&mut self) -> QueensResult<&mut InGameState> {
         match &mut self.game_state {
-            GameState::InGame(ref mut std) => std,
-            _ => panic!("game is not ingame"),
+            GameState::InGame(ref mut std) => Ok(std),
+            _ => Err(QueensError::NotIngame),
         }
     }
 
-    pub fn in_game(&self) -> &InGameState {
+    fn in_game(&self) -> QueensResult<&InGameState> {
         match &self.game_state {
-            GameState::InGame(std) => std,
-            _ => panic!("game is not ingame"),
+            GameState::InGame(std) => Ok(std),
+            _ => Err(QueensError::NotIngame),
         }
     }
 
     pub fn get_grid(&self) -> Grid {
-        self.in_game().get_grid()
+        self.in_game().unwrap().get_grid()
     }
 
     pub fn get_marked(&self) -> Option<usize> {
-        self.in_game().get_marked()
+        self.in_game().unwrap().get_marked()
     }
 
     pub fn set_marked(&mut self, marked: Option<usize>) {
-        self.in_game_mut().set_marked(marked)
+        self.in_game_mut().unwrap().set_marked(marked)
     }
 
     pub fn get_layout(&self) -> Layout {
-        self.in_game().get_layout()
+        self.in_game().unwrap().get_layout()
     }
 
     pub fn get_tile(&self, x: usize) -> QueensResult<Tile> {
-        self.in_game().get_tile(x)
+        self.in_game()?.get_tile(x)
     }
 
     pub fn set_tile(&mut self, x: usize, tile: Tile) {
-        self.in_game_mut().set_tile(x, tile)
+        self.in_game_mut().unwrap().set_tile(x, tile)
     }
 
     pub fn flip_tile(&mut self, c: usize) -> QueensResult<()> {
-        self.in_game_mut().flip_tile(c)
+        self.in_game_mut()?.flip_tile(c)
     }
 
     // Get the list of game errors and whether the game has been won.
     pub fn get_win_status(&self) -> QueensResult<(Vec<GameRuleBroken>, bool)> {
-        self.in_game().get_win_status(self.n)
+        self.in_game()?.get_win_status(self.n)
     }
 }
 

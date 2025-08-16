@@ -9,27 +9,21 @@ pub enum QueensError {
     OutOfBounds { c: usize },
     Invalid2DCoordinate { column: usize, row: usize, n: usize },
     RefreshRequested,
+    NotIngame,
 }
 
 impl Display for QueensError {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self {
-            QueensError::OutOfBounds { c } => {
-                write!(f, "Coordinate {} out of bounds", c)
-            }
-            QueensError::Invalid2DCoordinate { column, row, n } => {
-                write!(
-                    f,
-                    "2D coordinate ({}, {}) is invalid for {} by {} grid",
-                    column, row, n, n
-                )
-            }
-            QueensError::AreaNotFound { c } => {
-                write!(f, "Area not found at coordinate {}", c)
-            }
-            QueensError::RefreshRequested => {
-                write!(f, "Refresh request was requested")
-            }
+            QueensError::OutOfBounds { c } => write!(f, "Coordinate {} out of bounds", c),
+            QueensError::Invalid2DCoordinate { column, row, n } => write!(
+                f,
+                "2D coordinate ({}, {}) is invalid for {} by {} grid",
+                column, row, n, n
+            ),
+            QueensError::AreaNotFound { c } => write!(f, "Area not found at coordinate {}", c),
+            QueensError::RefreshRequested => write!(f, "Refresh request was requested"),
+            QueensError::NotIngame => write!(f, "Not ingame"),
         }
     }
 }

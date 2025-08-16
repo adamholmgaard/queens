@@ -62,8 +62,7 @@ impl QueensApp {
         CentralPanel::default().show(ctx, |ui| {
             ui.vertical(|ui| {
                 ui.label("You won!");
-                if ui.button("Press to start over").clicked() {
-                    // Reset the whole state such that the board is fresh
+                if ui.button("Go to main menu").clicked() {
                     self.state = State::default();
                 }
             })

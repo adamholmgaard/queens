@@ -22,7 +22,7 @@ impl GridUi {
 
                             let tile: Tile = state.get_tile(coord)?;
                             if ui.add(tile).clicked() {
-                                state.in_game_mut().flip_tile(coord)?;
+                                state.flip_tile(coord)?;
                             }
                             Ok(())
                         });
