@@ -31,10 +31,8 @@ impl State {
         self.game_state = GameState::Won;
     }
 
-    pub fn go_to_main_menu(&mut self) {
-        self.n = 10;
-        self.game_state = GameState::MainMenu;
-        self.layout_type = LayoutType::default();
+    pub fn get_layout_type(&self) -> &LayoutType {
+        &self.layout_type
     }
 
     pub fn set_layout_type(&mut self, layout_type: LayoutType) {

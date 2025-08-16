@@ -1,6 +1,8 @@
 use crate::errors::QueensResult;
+use crate::model::layout::LayoutType;
 use crate::model::state::State;
-use eframe::egui::{CentralPanel, Context, Key, Slider};
+use eframe::egui::Event::Text;
+use eframe::egui::{CentralPanel, Context, Key, RadioButton, Slider};
 
 #[derive(Default)]
 pub struct MainMenuUi {}
@@ -13,6 +15,20 @@ impl MainMenuUi {
                 let mut n = state.get_n();
                 ui.add(Slider::new(&mut n, 6..=12).text("Set n (can only be 10 right now)"));
                 state.set_n(n);
+
+                ui.label("Select a layout type");
+                let mut layout_type = state.get_layout_type().clone();
+                ui.radio_value(&mut layout_type, LayoutType::Generated, "Generate a layout");
+                ui.radio_value(&mut layout_type, LayoutType::Easy, "Easily solvable");
+                ui.radio_value(
+                    &mut layout_type,
+                    LayoutType::Complex,
+                    "Complex template (only for n = 10)",
+                );
+                if layout_type == LayoutType::Complex {
+                    state.set_n(10);
+                }
+                state.set_layout_type(layout_type);
 
                 // todo set whether or not to move marker across sides
 

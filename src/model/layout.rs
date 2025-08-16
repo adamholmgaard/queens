@@ -125,6 +125,9 @@ impl Layout {
 
     // Complex layout
     pub fn complex_layout(n: usize) -> Layout {
+        if n != 10 {
+            panic!("n needs to be 10 for complex layout")
+        }
         let r1 = vec![
             section(0..n),
             section(n * 2 - 1),
@@ -297,7 +300,7 @@ fn section_to_int(args: Vec<Section>) -> Vec<usize> {
     vec
 }
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, PartialEq)]
 pub enum LayoutType {
     Easy,
     Complex,
