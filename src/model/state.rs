@@ -1,7 +1,7 @@
-use crate::errors::{QueensError, QueensResult};
+use crate::errors::QueensResult;
 use crate::model::game_rule_broken::GameRuleBroken;
 use crate::model::grid::Grid;
-use crate::model::layout::{complex_layout, Layout};
+use crate::model::layout::{Layout, LayoutType};
 use crate::model::tile::Tile;
 
 #[derive(Default, Clone)]
@@ -19,6 +19,7 @@ pub struct State {
     game_state: GameState,
     marked: Option<usize>,
     n: usize,
+    layout_type: LayoutType,
 }
 
 impl State {
@@ -136,12 +137,21 @@ impl State {
                 && errors.clone().is_empty(),
         ))
     }
+
+    fn create_layout(layout_type: LayoutType) -> Layout {
+        match layout_type {
+            LayoutType::Easy => Layout::easy_layout(),
+            LayoutType::Complex => Layout::complex_layout(),
+            LayoutType::Generated => Layout::generate_layout(),
+        }
+    }
 }
 
 impl Default for State {
     fn default() -> Self {
         let mut grid = Grid::default();
-        let layout = Layout::default();
+        let layout_type = LayoutType::default();
+        let layout = Self::create_layout(layout_type.clone());
 
         for area in layout.get_areas() {
             for index in area.get_sections().clone() {
@@ -155,6 +165,7 @@ impl Default for State {
             marked: None,
             game_state: GameState::default(),
             n: 10,
+            layout_type,
         }
     }
 }
