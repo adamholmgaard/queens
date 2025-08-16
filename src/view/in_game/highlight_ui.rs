@@ -23,9 +23,8 @@ impl HighlightUI {
     }
 
     fn render_areas(ui: &mut Ui, state: State) -> QueensResult<()> {
-        for x in state.get_layout().get_areas() {
-            // TODO highlight areas with correct borders
-            //Self::highlight(ui, state.clone(), x.clone(), Color32::GRAY)?;
+        for area in state.get_layout().get_areas() {
+            Self::highlight(ui, state.clone(), area.clone(), Color32::GRAY)?;
         }
         Ok(())
     }
@@ -54,21 +53,59 @@ impl HighlightUI {
                     let tile_side = TILE_SIZE.x;
                     let upper_left = upper_left_corner
                         + Vec2::new(
-                            column as f32 * (tile_side + pad),
-                            row as f32 * (tile_side + pad),
+                            column as f32 * (tile_side + pad) - pad / 2f32,
+                            row as f32 * (tile_side + pad) - pad / 2f32,
                         );
-                    let upper_right = TILE_SIZE.to_pos2() + upper_left.to_vec2();
+                    let upper_right = upper_left + Vec2::new(tile_side + 2f32 + pad / 2f32, 0f32);
+                    let bottom_right = upper_left
+                        + Vec2::new(tile_side + 2f32 + pad / 2f32, tile_side + 2f32 + pad / 2f32);
+                    let bottom_left = upper_left + Vec2::new(0f32, tile_side + 2f32 + pad / 2f32);
 
-                    ui.painter().rect(
-                        Rect::from_min_max(
-                            upper_left - Vec2::splat(1.0),
-                            upper_right + Vec2::splat(1.0),
-                        ),
-                        2,
-                        highlight_color.gamma_multiply_u8(127),
-                        Stroke::new(1.0, Color32::WHITE),
-                        StrokeKind::Middle,
-                    );
+                    // TODO coordinate type!
+                    if !(column != 0
+                        && state
+                            .get_grid()
+                            .merge_coordinate(column - 1, row)
+                            .is_ok_and(|t| area.get_sections().contains(&t)))
+                    {
+                        ui.painter().line_segment(
+                            [upper_left, bottom_left],
+                            Stroke::new(1.0, Color32::WHITE),
+                        );
+                    }
+                    if !(row != 0
+                        && state
+                            .get_grid()
+                            .merge_coordinate(column, row - 1)
+                            .is_ok_and(|t| area.get_sections().contains(&t)))
+                    {
+                        ui.painter().line_segment(
+                            [upper_left, upper_right],
+                            Stroke::new(1.0, Color32::WHITE),
+                        );
+                    }
+                    if !state
+                        .get_grid()
+                        .merge_coordinate(column + 1, row)
+                        .is_ok_and(|t| area.get_sections().contains(&t))
+                    {
+                        ui.painter().line_segment(
+                            [upper_right, bottom_right],
+                            Stroke::new(1.0, Color32::WHITE),
+                        );
+                    }
+                    if !state
+                        .get_grid()
+                        .merge_coordinate(column, row + 1)
+                        .is_ok_and(|t| area.get_sections().contains(&t))
+                    {
+                        ui.painter().line_segment(
+                            [bottom_left, bottom_right],
+                            Stroke::new(1.0, Color32::WHITE),
+                        );
+                    }
+
+                    // also quadratic bezier curves for rounded corners?
                 }
             }
         }
