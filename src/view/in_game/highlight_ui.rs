@@ -9,20 +9,20 @@ use eframe::egui::{vec2, Color32, CornerRadius, Pos2, Rect, Stroke, StrokeKind, 
 pub struct HighlightUI {}
 
 impl HighlightUI {
-    pub fn render(ui: &mut Ui, state: InGameState) -> QueensResult<()> {
+    pub fn render(ui: &mut Ui, state: State) -> QueensResult<()> {
         Self::render_areas(ui, state.clone())?;
         Self::render_keyboard_mark(ui, state)?;
         Ok(())
     }
 
-    fn render_keyboard_mark(ui: &mut Ui, state: InGameState) -> QueensResult<()> {
+    fn render_keyboard_mark(ui: &mut Ui, state: State) -> QueensResult<()> {
         if let Some(i) = state.get_marked() {
             Self::highlight(ui, state, Area::from_usize(i, 0), Color32::GRAY)?;
         }
         Ok(())
     }
 
-    fn render_areas(ui: &mut Ui, state: InGameState) -> QueensResult<()> {
+    fn render_areas(ui: &mut Ui, state: State) -> QueensResult<()> {
         for x in state.get_layout().get_areas() {
             //Self::highlight(ui, state.clone(), x.clone(), Color32::GRAY)?;
         }
@@ -31,7 +31,7 @@ impl HighlightUI {
 
     pub fn highlight(
         ui: &mut Ui,
-        state: InGameState,
+        state: State,
         area: Area,
         highlight_color: Color32,
     ) -> QueensResult<()> {

@@ -62,6 +62,39 @@ impl State {
             _ => panic!("game is not ingame"),
         }
     }
+
+    pub fn get_grid(&self) -> Grid {
+        self.in_game().get_grid()
+    }
+
+    pub fn get_marked(&self) -> Option<usize> {
+        self.in_game().get_marked()
+    }
+
+    pub fn set_marked(&mut self, marked: Option<usize>) {
+        self.in_game_mut().set_marked(marked)
+    }
+
+    pub fn get_layout(&self) -> Layout {
+        self.in_game().get_layout()
+    }
+
+    pub fn get_tile(&self, x: usize) -> QueensResult<Tile> {
+        self.in_game().get_tile(x)
+    }
+
+    pub fn set_tile(&mut self, x: usize, tile: Tile) {
+        self.in_game_mut().set_tile(x, tile)
+    }
+
+    pub fn flip_tile(&mut self, c: usize) -> QueensResult<()> {
+        self.in_game_mut().flip_tile(c)
+    }
+
+    // Get the list of game errors and whether the game has been won.
+    pub fn get_win_status(&self) -> QueensResult<(Vec<GameRuleBroken>, bool)> {
+        self.in_game().get_win_status(self.n)
+    }
 }
 
 impl Default for State {
@@ -79,7 +112,6 @@ pub struct InGameState {
     grid: Grid,
     layout: Layout,
     marked: Option<usize>,
-    n: usize,
 }
 
 impl InGameState {
@@ -101,7 +133,6 @@ impl InGameState {
             grid,
             layout,
             marked: None,
-            n,
         }
     }
 
@@ -136,13 +167,8 @@ impl InGameState {
         })
     }
 
-    pub fn get_n(&self) -> usize {
-        self.n
-    }
-
     // Get the list of game errors and whether the game has been won.
-    pub fn get_win_status(&self) -> QueensResult<(Vec<GameRuleBroken>, bool)> {
-        let n = self.get_n();
+    pub fn get_win_status(&self, n: usize) -> QueensResult<(Vec<GameRuleBroken>, bool)> {
         let mut errors = Vec::new();
         let mut rows = Vec::new();
         let mut cols = Vec::new();

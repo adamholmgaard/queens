@@ -9,7 +9,6 @@ pub enum QueensError {
     OutOfBounds { c: usize },
     Invalid2DCoordinate { column: usize, row: usize, n: usize },
     RefreshRequested,
-    
 }
 
 impl Display for QueensError {

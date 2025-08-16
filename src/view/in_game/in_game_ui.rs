@@ -1,11 +1,9 @@
 use crate::errors::{QueensError, QueensResult};
-use crate::model::state::{GameState, InGameState, State};
+use crate::model::state::State;
 use crate::view::in_game::grid_ui::GridUi;
 use crate::view::in_game::highlight_ui::HighlightUI;
 use crate::view::in_game::underlay_ui::UnderlayUi;
-use eframe::egui::{vec2, Align2, Area, Button, CentralPanel, Context, Id, Key, Ui, Vec2, Window};
-use std::thread::sleep;
-use std::time::Duration;
+use eframe::egui::{Align2, CentralPanel, Context, Key, Vec2, Window};
 
 #[derive(Default)]
 pub struct InGameUi {}
@@ -21,13 +19,13 @@ impl InGameUi {
             UnderlayUi::render(ui, state);
             res = res
                 .and_then(|_| GridUi::render(ui, state))
-                .and_then(|_| HighlightUI::render(ui, state.in_game().clone()));
+                .and_then(|_| HighlightUI::render(ui, state.clone()));
         });
         res?;
 
         let in_game_state = state.in_game_mut();
 
-        let (errors, game_won) = in_game_state.get_win_status()?;
+        let (errors, game_won) = state.get_win_status()?;
 
         // TODO only show these windows if debug
         if !errors.is_empty() {
@@ -54,7 +52,7 @@ impl InGameUi {
         let default_marked = 0;
 
         if ctx.input(|x| x.key_pressed(Key::ArrowRight)) {
-            let new_coord = match state.in_game().get_marked() {
+            let new_coord = match state.get_marked() {
                 None => default_marked,
                 Some(c) => {
                     if cmd_ctrl_pressed {
@@ -72,10 +70,10 @@ impl InGameUi {
                     }
                 }
             };
-            state.in_game_mut().set_marked(Some(new_coord));
+            state.set_marked(Some(new_coord));
         }
         if ctx.input(|x| x.key_pressed(Key::ArrowLeft)) {
-            let new_coord = match state.in_game().get_marked() {
+            let new_coord = match state.get_marked() {
                 None => default_marked,
                 Some(c) => {
                     if cmd_ctrl_pressed {
@@ -93,10 +91,10 @@ impl InGameUi {
                     }
                 }
             };
-            state.in_game_mut().set_marked(Some(new_coord));
+            state.set_marked(Some(new_coord));
         }
         if ctx.input(|x| x.key_pressed(Key::ArrowDown)) {
-            let new_coord = match state.in_game().get_marked() {
+            let new_coord = match state.get_marked() {
                 None => default_marked,
                 Some(c) => {
                     if cmd_ctrl_pressed {
@@ -114,10 +112,10 @@ impl InGameUi {
                     }
                 }
             };
-            state.in_game_mut().set_marked(Some(new_coord));
+            state.set_marked(Some(new_coord));
         }
         if ctx.input(|x| x.key_pressed(Key::ArrowUp)) {
-            let new_coord = match state.in_game().get_marked() {
+            let new_coord = match state.get_marked() {
                 None => default_marked,
                 Some(c) => {
                     if cmd_ctrl_pressed {
@@ -135,18 +133,18 @@ impl InGameUi {
                     }
                 }
             };
-            state.in_game_mut().set_marked(Some(new_coord));
+            state.set_marked(Some(new_coord));
         }
         if ctx.input(|x| x.key_pressed(Key::Escape)) {
-            if state.in_game().get_marked().is_some() {
-                state.in_game_mut().set_marked(None);
+            if state.get_marked().is_some() {
+                state.set_marked(None);
             } else {
                 return Err(QueensError::RefreshRequested);
             }
         }
         if ctx.input(|x| x.key_pressed(Key::Space) || x.key_pressed(Key::Enter)) {
-            if let Some(c) = state.in_game().get_marked() {
-                state.in_game_mut().flip_tile(c).expect("Could not flip tile");
+            if let Some(c) = state.get_marked() {
+                state.flip_tile(c).expect("Could not flip tile");
             }
         }
         Ok(())

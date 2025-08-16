@@ -18,10 +18,9 @@ impl GridUi {
                 ui.horizontal(|ui| {
                     for col in 0..state.get_n() {
                         res = res.and_then(|_| {
-                            let in_game_state = state.in_game();
-                            let coord = in_game_state.get_grid().merge_coordinate(col, row)?;
+                            let coord = state.get_grid().merge_coordinate(col, row)?;
 
-                            let tile: Tile = in_game_state.get_tile(coord)?;
+                            let tile: Tile = state.get_tile(coord)?;
                             if ui.add(tile).clicked() {
                                 state.in_game_mut().flip_tile(coord)?;
                             }
