@@ -10,8 +10,6 @@ use eframe::egui::{Align2, CentralPanel, Context, Key, Vec2, Window};
 use eframe::{egui, Frame};
 use errors::QueensResult;
 use log::warn;
-use std::thread::sleep;
-use std::time::Duration;
 // ONLY the main functionality
 
 fn main() -> eframe::Result {
@@ -46,8 +44,8 @@ struct QueensApp {
 impl eframe::App for QueensApp {
     fn update(&mut self, ctx: &Context, _frame: &mut Frame) {
         if let Err(e) = match self.state.get_game_state() {
-            GameState::InGame => self.render_in_game(ctx),
-            GameState::MainMenu => self.render_main_menu(ctx),
+            GameState::MainMenu => self.main_menu_ui.render(ctx, &mut self.state),
+            GameState::InGame(_) => self.in_game_ui.render(ctx, &mut self.state),
             GameState::Won => self.render_won(ctx),
         } {
             warn!("{}", e); // if not debug give error window?
@@ -60,14 +58,6 @@ impl eframe::App for QueensApp {
 }
 
 impl QueensApp {
-    fn render_in_game(&mut self, ctx: &Context) -> QueensResult<()> {
-        self.in_game_ui.render(ctx, &mut self.state)
-    }
-
-    fn render_main_menu(&mut self, ctx: &Context) -> QueensResult<()> {
-        self.main_menu_ui.render(ctx, &mut self.state)
-    }
-
     fn render_won(&mut self, ctx: &Context) -> QueensResult<()> {
         CentralPanel::default().show(ctx, |ui| {
             ui.vertical(|ui| {

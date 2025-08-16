@@ -4,31 +4,105 @@ use crate::model::grid::Grid;
 use crate::model::layout::{Layout, LayoutType};
 use crate::model::tile::Tile;
 
-#[derive(Default, Clone)]
+#[derive(Clone)]
+pub struct State {
+    n: usize,
+    layout_type: LayoutType,
+    game_state: GameState,
+}
+
+#[derive(Clone, Default)]
 pub enum GameState {
-    #[default] // default is ingame until main menu is fully functional
+    #[default]
     MainMenu,
-    InGame,
+    InGame(InGameState),
     Won,
 }
 
-#[derive(Clone)]
-pub struct State {
-    grid: Grid,
-    layout: Layout,
-    game_state: GameState,
-    marked: Option<usize>,
-    n: usize,
-    layout_type: LayoutType,
-}
-
 impl State {
-    pub fn get_n(&self) -> usize {
-        self.n
+    pub fn get_game_state(&self) -> &GameState {
+        &self.game_state
+    }
+    pub fn load_in_game(&mut self) {
+        self.game_state = GameState::InGame(InGameState::new(self.n, self.layout_type.clone()));
+    }
+
+    pub fn set_game_won(&mut self) {
+        self.game_state = GameState::Won;
+    }
+
+    pub fn go_to_main_menu(&mut self) {
+        self.n = 10;
+        self.game_state = GameState::MainMenu;
+        self.layout_type = LayoutType::default();
+    }
+
+    pub fn set_layout_type(&mut self, layout_type: LayoutType) {
+        self.layout_type = layout_type;
     }
 
     pub fn set_n(&mut self, n: usize) {
         self.n = n;
+    }
+
+    pub fn get_n(&self) -> usize {
+        self.n
+    }
+
+    pub fn in_game_mut(&mut self) -> &mut InGameState {
+        match &mut self.game_state {
+            GameState::InGame(ref mut std) => std,
+            _ => panic!("game is not ingame"),
+        }
+    }
+
+    pub fn in_game(&self) -> &InGameState {
+        match &self.game_state {
+            GameState::InGame(std) => std,
+            _ => panic!("game is not ingame"),
+        }
+    }
+}
+
+impl Default for State {
+    fn default() -> Self {
+        Self {
+            n: 10,
+            layout_type: LayoutType::default(),
+            game_state: GameState::default(),
+        }
+    }
+}
+
+#[derive(Clone)]
+pub struct InGameState {
+    grid: Grid,
+    layout: Layout,
+    marked: Option<usize>,
+    n: usize,
+}
+
+impl InGameState {
+    pub fn new(n: usize, layout_type: LayoutType) -> InGameState {
+        let mut grid = Grid::new(n);
+        let layout = match layout_type {
+            LayoutType::Easy => Layout::easy_layout(n),
+            LayoutType::Complex => Layout::complex_layout(n),
+            LayoutType::Generated => Layout::generate_layout(n),
+        };
+
+        for area in layout.get_areas() {
+            for index in area.get_sections().clone() {
+                grid.set_tile(index, Tile::new(false, area.get_color()));
+            }
+        }
+
+        Self {
+            grid,
+            layout,
+            marked: None,
+            n,
+        }
     }
 
     pub fn get_grid(&self) -> Grid {
@@ -37,10 +111,6 @@ impl State {
 
     pub fn get_marked(&self) -> Option<usize> {
         self.marked
-    }
-
-    pub fn get_game_state(&self) -> &GameState {
-        &self.game_state
     }
 
     pub fn set_marked(&mut self, marked: Option<usize>) {
@@ -66,8 +136,8 @@ impl State {
         })
     }
 
-    pub fn set_game_state(&mut self, game_state: GameState) {
-        self.game_state = game_state;
+    pub fn get_n(&self) -> usize {
+        self.n
     }
 
     // Get the list of game errors and whether the game has been won.
@@ -136,36 +206,5 @@ impl State {
                 && (colors.len() == n)
                 && errors.clone().is_empty(),
         ))
-    }
-
-    fn create_layout(layout_type: LayoutType) -> Layout {
-        match layout_type {
-            LayoutType::Easy => Layout::easy_layout(),
-            LayoutType::Complex => Layout::complex_layout(),
-            LayoutType::Generated => Layout::generate_layout(),
-        }
-    }
-}
-
-impl Default for State {
-    fn default() -> Self {
-        let mut grid = Grid::default();
-        let layout_type = LayoutType::default();
-        let layout = Self::create_layout(layout_type.clone());
-
-        for area in layout.get_areas() {
-            for index in area.get_sections().clone() {
-                grid.set_tile(index, Tile::new(false, area.get_color()));
-            }
-        }
-
-        Self {
-            grid,
-            layout,
-            marked: None,
-            game_state: GameState::default(),
-            n: 10,
-            layout_type,
-        }
     }
 }

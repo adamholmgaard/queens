@@ -6,7 +6,7 @@ pub enum GameRuleBroken {
     Row { row: usize },
     Column { col: usize },
     Area { area: Area },
-    Diagonal { c1: usize, c2: usize }, // add coordinate struct
+    Diagonal { c1: usize, c2: usize }, // todo add coordinate struct
 }
 
 impl Display for GameRuleBroken {

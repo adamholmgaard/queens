@@ -112,9 +112,8 @@ impl Layout {
         Err(QueensError::AreaNotFound { c: index })
     }
 
-    // Easily solvable layout with n=10
-    pub fn easy_layout() -> Layout {
-        let n = 10;
+    // Easily solvable layout
+    pub fn easy_layout(n: usize) -> Layout {
         let mut res: Vec<Vec<Section>> = vec![];
 
         for i in 0..n {
@@ -124,10 +123,8 @@ impl Layout {
         Layout::from_sections(res, n)
     }
 
-    // Complex layout with n=10
-    pub fn complex_layout() -> Layout {
-        let n = 10;
-
+    // Complex layout
+    pub fn complex_layout(n: usize) -> Layout {
         let r1 = vec![
             section(0..n),
             section(n * 2 - 1),
@@ -191,16 +188,15 @@ impl Layout {
         Layout::from_sections(vec![r1, r2, r3, r4, r5, r6, r7, r8, r9, r10], n)
     }
 
-    // Generate a solvable layout with n=10
-    pub fn generate_layout() -> Layout {
-        let n: usize = 10;
+    // Generate a solvable layout
+    pub fn generate_layout(n: usize) -> Layout {
         let size: usize = n.pow(2);
         let mut areas: Vec<Vec<Section>> = Vec::new();
         let mut numbers: Vec<usize> = (0..size).collect();
         let mut rng = rand::rng();
         numbers.shuffle(&mut rng);
-        let mut unavailable = [false; 100];
-        let mut placed = [false; 100];
+        let mut unavailable = vec![false; size];
+        let mut placed = vec![false; size];
 
         for _ in 0..n {
             let mut vec: Vec<Section> = Vec::new();
@@ -210,7 +206,7 @@ impl Layout {
                 match numbers.pop() {
                     None => {
                         // try again
-                        return Layout::generate_layout();
+                        return Layout::generate_layout(n);
                     }
                     Some(num) => {
                         r = num;
@@ -250,7 +246,7 @@ impl Layout {
         let mut number_placed = n;
 
         while number_placed < size {
-            // we do n - 1 to guarantee an area of one tile.
+            // we do n - 1 to guarantee at least one area of size one.
             // consider doing a skewed distribution instead like Poisson.
             let area_chosen_index = rng.random_range(0..n - 1);
             let area_chosen = areas.get(area_chosen_index).unwrap().clone();

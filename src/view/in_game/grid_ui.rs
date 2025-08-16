@@ -1,8 +1,7 @@
 use crate::errors::QueensResult;
-use crate::model::state::State;
+use crate::model::state::{GameState, State};
 use crate::model::tile::Tile;
 use eframe::egui::{Ui, Vec2};
-use log::debug;
 
 // Grid ui
 pub struct GridUi {}
@@ -19,11 +18,12 @@ impl GridUi {
                 ui.horizontal(|ui| {
                     for col in 0..state.get_n() {
                         res = res.and_then(|_| {
-                            let coord = state.get_grid().merge_coordinate(col, row)?;
+                            let in_game_state = state.in_game();
+                            let coord = in_game_state.get_grid().merge_coordinate(col, row)?;
 
-                            let tile: Tile = state.get_tile(coord)?;
+                            let tile: Tile = in_game_state.get_tile(coord)?;
                             if ui.add(tile).clicked() {
-                                state.flip_tile(coord)?;
+                                state.in_game_mut().flip_tile(coord)?;
                             }
                             Ok(())
                         });
