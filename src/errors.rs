@@ -8,6 +8,8 @@ pub enum QueensError {
     AreaNotFound { c: usize },
     OutOfBounds { c: usize },
     Invalid2DCoordinate { column: usize, row: usize, n: usize },
+    RefreshRequested,
+    
 }
 
 impl Display for QueensError {
@@ -25,6 +27,9 @@ impl Display for QueensError {
             }
             QueensError::AreaNotFound { c } => {
                 write!(f, "Area not found at coordinate {}", c)
+            }
+            QueensError::RefreshRequested => {
+                write!(f, "Refresh request was requested")
             }
         }
     }

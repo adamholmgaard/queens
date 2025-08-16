@@ -1,4 +1,4 @@
-use crate::errors::QueensResult;
+use crate::errors::{QueensError, QueensResult};
 use crate::model::state::{GameState, InGameState, State};
 use crate::view::in_game::grid_ui::GridUi;
 use crate::view::in_game::highlight_ui::HighlightUI;
@@ -14,7 +14,7 @@ impl InGameUi {
     pub fn render(&self, ctx: &Context, state: &mut State) -> QueensResult<()> {
         let panel = CentralPanel::default();
 
-        self.handle_keyboard_input(ctx, state);
+        self.handle_keyboard_input(ctx, state)?;
 
         let mut res = Ok(());
         panel.show(ctx, |ui| {
@@ -47,7 +47,7 @@ impl InGameUi {
         Ok(())
     }
 
-    fn handle_keyboard_input(&self, ctx: &Context, state: &mut State) {
+    fn handle_keyboard_input(&self, ctx: &Context, state: &mut State) -> QueensResult<()> {
         let n = state.get_n();
 
         let cmd_ctrl_pressed = ctx.input(|x| x.modifiers.command_only());
@@ -138,12 +138,17 @@ impl InGameUi {
             state.in_game_mut().set_marked(Some(new_coord));
         }
         if ctx.input(|x| x.key_pressed(Key::Escape)) {
-            state.in_game_mut().set_marked(None);
+            if state.in_game().get_marked().is_some() {
+                state.in_game_mut().set_marked(None);
+            } else {
+                return Err(QueensError::RefreshRequested);
+            }
         }
         if ctx.input(|x| x.key_pressed(Key::Space) || x.key_pressed(Key::Enter)) {
             if let Some(c) = state.in_game().get_marked() {
                 state.in_game_mut().flip_tile(c).expect("Could not flip tile");
             }
         }
+        Ok(())
     }
 }
